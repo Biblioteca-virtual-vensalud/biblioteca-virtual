@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administración - Biblioteca Virtual</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { min-height: 100vh; background-color: #1a252f; color: white; padding-top: 20px; }
+        .sidebar a { color: #b8c7ce; text-decoration: none; padding: 12px 20px; display: block; }
+        .sidebar a:hover, .sidebar a.active { background-color: #2c3e50; color: white; }
+        .login-box { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Menú Lateral -->
+        <div class="col-md-2 sidebar p-0">
+            <h4 class="text-center py-3 border-bottom border-secondary">Biblioteca Virtual</h4>
+            <a href="/">Usuarios / Registro QR</a>
+            <a href="/admin" class="active">Panel de Administración 🔐</a>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="col-md-10 p-4">
+            
+            <!-- FORMULARIO DE ACCESO -->
+            <div id="loginSection" class="login-box text-center">
+                <h3 class="mb-3">Acceso Administradora</h3>
+                <p class="text-muted">Exclusivo para Iraida Mijares</p>
+                <div class="mb-3">
+                    <input type="password" id="adminKey" class="form-control text-center" placeholder="Ingrese su clave de acceso">
+                </div>
+                <button onclick="verificarClave()" class="btn btn-primary w-100">Ingresar al Panel</button>
+                <div id="loginError" class="text-danger mt-2"></div>
+            </div>
