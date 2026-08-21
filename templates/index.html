@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Biblioteca Virtual</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { min-height: 100vh; background-color: #1e293b; color: white; }
+        .sidebar a { color: #94a3b8; text-decoration: none; padding: 10px 15px; display: block; border-radius: 6px; margin-bottom: 5px; }
+        .sidebar a:hover, .sidebar a.active { background-color: #0ea5e9; color: white; }
+        .card { border: none; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Panel Lateral -->
+        <div class="col-md-3 col-lg-2 sidebar p-3">
+            <h4 class="text-white text-center mb-4">Biblioteca Virtual</h4>
+            <nav class="nav flex-column">
+                <a href="#" class="active" onclick="mostrarSeccion('usuarios')">Usuarios / Registro QR</a>
+                <a href="#" onclick="mostrarSeccion('documentos')">Cargar Documentos</a>
+                <a href="#" onclick="mostrarSeccion('reportes')">Panel de Métricas</a>
+                <a href="/admin" class="nav-link text-white">🔐 Panel de Administración</a>
+            </nav>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="col-md-9 col-lg-10 p-4">
+            
+            <!-- SECCIÓN 1: USUARIOS -->
+            <div id="sec-usuarios" class="seccion">
+                <h3 class="mb-4">Registro de Usuarios y Generación de QR</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card p-4">
+                            <form id="formUsuario">
+                                <div class="mb-3">
+                                    <label class="form-label">Cédula / ID</label>
+                                    <input type="text" id="u_cedula" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre Completo</label>
+                                    <input type="text" id="u_nombre" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Cargo / Área</label>
+                                    <input type="text" id="u_cargo" class="form-control" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Registrar y Generar QR</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <div class="card p-4">
+                            <h5>Código QR Generado</h5>
+                            <div id="qrResult" class="mt-3">
+                                <p class="text-muted">Complete el formulario para obtener la credencial QR.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2: DOCUMENTOS -->
+            <div id="sec-documentos" class="seccion d-none">
+                <h3 class="mb-4">Clasificación y Carga de Documentos</h3>
+                <div class="card p-4">
+                    <form id="formDoc">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Categoría / Equipo</label>
+                                <input type="text" id="d_equipo" class="form-control" placeholder="Ej: Incubadora, Ventilador" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Gama / Clasificación</label>
+                                <select id="d_gama" class="form-select">
+                                    <option value="Alta">Alta</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Estándar">Estándar</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Archivo Adjunto (.pdf, .doc, .html)</label>
+                                <input type="file" id="d_archivo" class="form-control" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Guardar Documento</button>
+                    </form>
+                    <div id="docResult" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3: REPORTES -->
+            <div id="sec-reportes" class="seccion d-none">
+                <h3 class="mb-4">Métricas del Sistema</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card p-4 text-center bg-white mb-3">
+                            <h4>Total Usuarios</h4>
+                            <p class="display-4 font-weight-bold text-primary" id="m_usuarios">0</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card p-4 text-center bg-white mb-3">
+                            <h4>Total Documentos</h4>
+                            <p class="display-4 font-weight-bold text-success" id="m_documentos">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function mostrarSeccion(sec) {
+        document.querySelectorAll('.seccion').forEach(el => el.classList.add('d-none'));
+        document.getElementById('sec-' + sec).classList.remove('d-none');
+        if(sec === 'reportes') cargarMetricas();
+    }
+
+    document.getElementById('formUsuario').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const res = await fetch('/api/usuarios/registrar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                cedula: document.getElementById('u_cedula').value,
+                nombre: document.getElementById('u_nombre').value,
+                cargo: document.getElementById('u_cargo').value
+            })
+        });
+        const data = await res.json();
+        if(res.ok) {
+            document.getElementById('qrResult').innerHTML = `
+                <p class="text-success">${data.mensaje}</p>
+                <img src="${data.qr_image_url}" class="img-fluid style="max-width:200px;">
+                <p class="small text-muted mt-2">Token: ${data.token_qr}</p>`;
+        }
+    });
+
+    document.getElementById('formDoc').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('equipo', document.getElementById('d_equipo').value);
+        formData.append('gama', document.getElementById('d_gama').value);
+        formData.append('archivo', document.getElementById('d_archivo').files[0]);
+
+        const res = await fetch('/api/documentos/cargar', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        const resDiv = document.getElementById('docResult');
+        if(res.ok) {
+            resDiv.innerHTML = `<div class="alert alert-success">${data.mensaje} - ID:${data.doc_id}</div>`;
+        } else {
+            resDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        }
+    });
+
+    async function cargarMetricas() {
+        const res = await fetch('/api/reportes/metricas');
+        const data = await res.json();
+        document.getElementById('m_usuarios').innerText = data.total_usuarios;
+        document.getElementById('m_documentos').innerText = data.total_documentos;
+    }
+</script>
+</body>
+</html>
