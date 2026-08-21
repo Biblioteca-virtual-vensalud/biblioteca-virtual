@@ -2,9 +2,13 @@ import os
 import hashlib
 import qrcode
 from datetime import datetime
-from flask import Flask, request, jsonify, render_template, render_template_string, Response, abort
+from flask import Flask, request, jsonify, render_template, render_template_string, Response, abort, redirect, url_for, session
 
 app = Flask(__name__)
+app.secret_key = 'clave_secreta_biblioteca'  # Necesario para gestionar la sesión del usuario
+
+# Contraseña del panel administrativo
+ADMIN_PASSWORD = "admin123"
 
 # Configuración de carpetas de almacenamiento
 UPLOAD_FOLDER = 'biblioteca_storage'
@@ -22,6 +26,34 @@ DB = {
 @app.route('/')
 def inicio():
     return render_template('index.html')
+
+# MÓDULO: AUTENTICACIÓN ADMIN
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        password = request.form.get('password') or (request.json.get('password') if request.is_json else None)
+        if password == ADMIN_PASSWORD:
+            session['admin_logged_in'] = True
+            if request.is_json:
+                return jsonify({"mensaje": "Acceso concedido"}), 200
+            return redirect(url_for('vista_admin'))
+        else:
+            if request.is_json:
+                return jsonify({"error": "Contraseña incorrecta"}), 401
+            return render_template_string('<h3>Contraseña incorrecta</h3><a href="/login">Intentar de nuevo</a>'), 401
+
+    return '''
+        <form method="post" style="margin: 50px; text-align: center; font-family: sans-serif;">
+            <h2>Acceso Administrativo</h2>
+            <input type="password" name="password" placeholder="Contraseña Admin" required style="padding: 8px;">
+            <button type="submit" style="padding: 8px 15px;">Entrar</button>
+        </form>
+    '''
+
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('login'))
 
 # MÓDULO: REGISTRO DE USUARIOS
 @app.route('/api/usuarios/registrar', methods=['POST'])
@@ -72,14 +104,12 @@ def obtener_usuario_qr(token_qr):
     if not usuario:
         return jsonify({"error": "Usuario o código QR no encontrado"}), 404
 
-    # Verificar si Iraida desactivó a este trabajador
     if usuario.get("estado") != "Activo":
         return jsonify({
             "error": "Acceso denegado",
             "mensaje": "Este usuario ha sido desactivado por la Administración de la Biblioteca Virtual."
         }), 403
 
-    # Incrementar el contador de visitas al escanear
     usuario["visitas"] = usuario.get("visitas", 0) + 1
 
     return jsonify({
@@ -88,12 +118,15 @@ def obtener_usuario_qr(token_qr):
     }), 200
 
 
-# MÓDULO ADMINISTRATIVO: CAMBIAR ESTADO / ELIMINAR (EXCLUSIVO IRAIDA MIJARES)
+# MÓDULO ADMINISTRATIVO: CAMBIAR ESTADO / ELIMINAR (PROTEGIDO)
 @app.route('/api/admin/usuarios/estado', methods=['POST'])
 def cambiar_estado_usuario():
+    if not session.get('admin_logged_in'):
+        return jsonify({"error": "No autorizado"}), 401
+
     data = request.json
     token_qr = data.get('token_qr')
-    nuevo_estado = data.get('estado') # 'Activo' o 'Inactivo'
+    nuevo_estado = data.get('estado')
 
     if token_qr in DB["usuarios"]:
         DB["usuarios"][token_qr]["estado"] = nuevo_estado
@@ -107,11 +140,12 @@ def cambiar_estado_usuario():
 
 @app.route('/api/admin/usuarios/eliminar/<token_qr>', methods=['DELETE'])
 def eliminar_usuario_admin(token_qr):
+    if not session.get('admin_logged_in'):
+        return jsonify({"error": "No autorizado"}), 401
+
     if token_qr in DB["usuarios"]:
-        # Borrar datos de la BD local
         del DB["usuarios"][token_qr]
         
-        # Eliminar archivo QR físico
         qr_file = os.path.join(app.root_path, 'static', 'qr_codes', f"{token_qr}.png")
         if os.path.exists(qr_file):
             os.remove(qr_file)
@@ -120,14 +154,19 @@ def eliminar_usuario_admin(token_qr):
 
     return jsonify({"error": "Usuario no encontrado"}), 404
 
-# RUTA WEB: VISTA DEL PANEL ADMINISTRATIVO
+# RUTA WEB: VISTA DEL PANEL ADMINISTRATIVO (PROTEGIDA)
 @app.route('/admin')
 def vista_admin():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
     return render_template('admin.html')
 
 # API: OBTENER TODOS LOS USUARIOS (PARA LA TABLA ADMIN)
 @app.route('/api/admin/usuarios', methods=['GET'])
 def obtener_todos_usuarios():
+    if not session.get('admin_logged_in'):
+        return jsonify({"error": "No autorizado"}), 401
+
     lista_usuarios = []
     for token, datos in DB.get("usuarios", {}).items():
         usuario_info = datos.copy()
