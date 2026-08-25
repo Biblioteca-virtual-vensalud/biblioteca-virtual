@@ -458,27 +458,39 @@
     });
   }
 
-  // --- FUNCIONES DE SEGURIDAD PARA ADMINISTRADOR ---
+ // --- FUNCIONES DE SEGURIDAD PARA ADMINISTRADOR ---
 
 function solicitarClaveAdmin() {
   let modalAdmin = new bootstrap.Modal(document.getElementById('modalAuthAdmin'));
   modalAdmin.show();
 }
 
-function validarAccesoAdmin() {
+async function validarAccesoAdmin() {
   const claveInput = document.getElementById('claveAdminInput').value;
-  const claveCorrecta = "admin123"; 
 
-  if (claveInput === claveCorrecta) {
-    let modalEl = document.getElementById('modalAuthAdmin');
-    let modal = bootstrap.Modal.getInstance(modalEl);
-    modal.hide();
-    
-    // Acceso concedido
-    cambiarVista('admin');
-    document.getElementById('errorClave').classList.add('d-none');
-    document.getElementById('claveAdminInput').value = '';
-  } else {
+  try {
+    const respuesta = await fetch('/validar-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clave: claveInput })
+    });
+
+    const resultado = await respuesta.json();
+
+    if (resultado.exito) {
+      let modalEl = document.getElementById('modalAuthAdmin');
+      let modal = bootstrap.Modal.getInstance(modalEl);
+      modal.hide();
+
+      // Acceso concedido
+      cambiarVista('admin');
+      document.getElementById('errorClave').classList.add('d-none');
+      document.getElementById('claveAdminInput').value = '';
+    } else {
+      document.getElementById('errorClave').classList.remove('d-none');
+    }
+  } catch (error) {
+    console.error('Error al validar la clave:', error);
     document.getElementById('errorClave').classList.remove('d-none');
   }
 }
