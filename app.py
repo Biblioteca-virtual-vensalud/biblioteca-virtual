@@ -27,19 +27,33 @@ DB = {
 def inicio():
     return render_template('index.html')
 
-# MÓDULO: AUTENTICACIÓN ADMIN
+# --- MÓDULO: AUTENTICACIÓN ADMIN ---
+
+ADMIN_PASSWORD = "admin123"  # Modifica esta clave según prefieras
+
+@app.route('/validar-admin', methods=['POST'])
+def validar_admin():
+    datos = request.get_json() or {}
+    clave_ingresada = datos.get('clave') or datos.get('password')
+    
+    if clave_ingresada == ADMIN_PASSWORD:
+        session['admin_logged_in'] = True
+        return jsonify({"exito": True, "mensaje": "Acceso concedido"}), 200
+    else:
+        return jsonify({"exito": False, "error": "Contraseña incorrecta"}), 401
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        password = request.form.get('password') or (request.json.get('password') if request.is_json else None)
+        password = request.form.get('password') or (request.json.get('clave') if request.is_json else None) or (request.json.get('password') if request.is_json else None)
         if password == ADMIN_PASSWORD:
             session['admin_logged_in'] = True
             if request.is_json:
-                return jsonify({"mensaje": "Acceso concedido"}), 200
+                return jsonify({"exito": True, "mensaje": "Acceso concedido"}), 200
             return redirect(url_for('vista_admin'))
         else:
             if request.is_json:
-                return jsonify({"error": "Contraseña incorrecta"}), 401
+                return jsonify({"exito": False, "error": "Contraseña incorrecta"}), 401
             return render_template_string('<h3>Contraseña incorrecta</h3><a href="/login">Intentar de nuevo</a>'), 401
 
     return '''
@@ -54,7 +68,6 @@ def login():
 def logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('login'))
-
 # MÓDULO: REGISTRO DE USUARIOS
 @app.route('/api/usuarios/registrar', methods=['POST'])
 def registrar_usuario():
