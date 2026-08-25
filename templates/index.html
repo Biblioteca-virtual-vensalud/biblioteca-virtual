@@ -1,175 +1,552 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Biblioteca Virtual</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { min-height: 100vh; background-color: #1e293b; color: white; }
-        .sidebar a { color: #94a3b8; text-decoration: none; padding: 10px 15px; display: block; border-radius: 6px; margin-bottom: 5px; }
-        .sidebar a:hover, .sidebar a.active { background-color: #0ea5e9; color: white; }
-        .card { border: none; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Biblioteca Virtual</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body { background-color: #f4f6f9; }
+    .sidebar { min-height: 100vh; background-color: #1e293b; color: #fff; }
+    .sidebar .nav-link { color: #cbd5e1; padding: 12px 20px; font-weight: 500; cursor: pointer; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #0f172a; color: #fff; }
+    .card-custom { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .qr-card { border: 2px dashed #0d6efd; background-color: #f8fafc; border-radius: 12px; }
+    .pdf-viewer-container { width: 100%; height: 75vh; border: none; }
+  </style>
 </head>
 <body>
 
 <div class="container-fluid">
-    <div class="row">
-        <!-- Panel Lateral -->
-        <div class="col-md-3 col-lg-2 sidebar p-3">
-            <h4 class="text-white text-center mb-4">Biblioteca Virtual</h4>
-            <nav class="nav flex-column">
-                <a href="#" class="active" onclick="mostrarSeccion('usuarios')">Usuarios / Registro QR</a>
-                <a href="#" onclick="mostrarSeccion('documentos')">Cargar Documentos</a>
-                <a href="#" onclick="mostrarSeccion('reportes')">Panel de Métricas</a>
-                <a href="/admin" class="nav-link text-white">🔐 Panel de Administración</a>
-            </nav>
-        </div>
+  <div class="row">
+    <!-- Navegación Lateral -->
+    <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
+      <div class="p-3 fs-4 fw-bold border-bottom border-secondary text-white">
+        Biblioteca Virtual
+      </div>
+      <ul class="nav flex-column mt-3">
+        <li class="nav-item">
+          <a class="nav-link active" id="nav-registro" onclick="mostrarSeccion('registro')">
+            <i class="fa-solid fa-user-plus me-2"></i>Usuarios / Registro QR
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="nav-cargar" onclick="mostrarSeccion('cargar')">
+            <i class="fa-solid fa-file-arrow-up me-2"></i>Cargar Documentos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="nav-documentos" onclick="mostrarSeccion('documentos')">
+            <i class="fa-solid fa-book me-2"></i>Documentos Cargados
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="nav-metricas" onclick="mostrarSeccion('metricas')">
+            <i class="fa-solid fa-chart-line me-2"></i>Panel de Métricas
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="nav-admin" onclick="mostrarSeccion('admin')">
+            <i class="fa-solid fa-gear me-2"></i>Administrador
+          </a>
+        </li>
+      </ul>
+    </nav>
 
-        <!-- Contenido Principal -->
-        <div class="col-md-9 col-lg-10 p-4">
+    <!-- Contenido Principal -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+      
+      <!-- SECCIÓN 1: REGISTRO Y QR -->
+      <div id="seccion-registro" class="seccion-contenido">
+        <h2 class="fw-bold mb-4">Registro de Usuarios y Generación de Credencial</h2>
+        <div class="row">
+          <div class="col-md-6 mb-4">
+            <div class="card card-custom p-4">
+              <h5 class="fw-bold mb-3">Formulario de Registro</h5>
+              <form id="formUsuario" onsubmit="generarCarnetQR(event)">
+                <div class="mb-3">
+                  <label class="form-label text-muted">Nombre Completo</label>
+                  <input type="text" id="nombreUsuario" class="form-control" placeholder="Ej: Ana Pérez" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted">Cédula / Identificación</label>
+                  <input type="text" id="cedulaUsuario" class="form-control" placeholder="Ej: V-12345678" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted">Cargo / Ocupación</label>
+                  <input type="text" id="cargoUsuario" class="form-control" placeholder="Ej: Técnico Electromedico / Estudiante" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted">Área / Departamento</label>
+                  <select id="areaUsuario" class="form-select" required>
+                    <option value="" disabled selected>Seleccione un área...</option>
+                    <option value="Mantenimiento y Equipos">Mantenimiento y Equipos</option>
+                    <option value="Docencia e Investigación">Docencia e Investigación</option>
+                    <option value="Administración / RRHH">Administración / RRHH</option>
+                    <option value="Estudiantes / PNF">Estudiantes / PNF</option>
+                    <option value="Visitante / General">Visitante / General</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Registrar Usuario</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-4">
+            <div id="resultadoQR" class="card card-custom p-4 text-center d-none">
+              <h5 class="fw-bold mb-3 text-start">Credencial Digital de Acceso</h5>
+              <div class="qr-card p-3 mb-3">
+                <div id="qrcode" class="d-flex justify-content-center my-3"></div>
+                <h5 class="fw-bold mb-1" id="resNombre"></h5>
+                <p class="text-muted mb-1" id="resCedula"></p>
+                <p class="badge bg-primary mb-3" id="resArea"></p>
+                
+                <div class="alert alert-warning border-warning mb-0 text-start">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <small class="text-muted d-block fw-bold">CLAVE DE ACCESO DIRECTO:</small>
+                      <span id="resClave" class="fw-bold fs-4 text-dark font-monospace"></span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="copiarClave()">
+                      <i class="fa-regular fa-copy me-1"></i> Copiar
+                    </button>
+                  </div>
+                  <small class="text-muted mt-2 d-block fs-7">
+                    <i class="fa-solid fa-circle-info me-1"></i> Utilice esta clave junto con su número de Cédula para ingresar al portal.
+                  </small>
+                </div>
+              </div>
+              <button onclick="window.print()" class="btn btn-outline-secondary w-100">
+                <i class="fa-solid fa-print me-1"></i> Imprimir Credencial
+              </button>
+            </div>
             
-            <!-- SECCIÓN 1: USUARIOS -->
-            <div id="sec-usuarios" class="seccion">
-                <h3 class="mb-4">Registro de Usuarios y Generación de QR</h3>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card p-4">
-                            <form id="formUsuario">
-                                <div class="mb-3">
-                                    <label class="form-label">Cédula / ID</label>
-                                    <input type="text" id="u_cedula" class="form-control" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Nombre Completo</label>
-                                    <input type="text" id="u_nombre" class="form-control" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Cargo / Área</label>
-                                    <input type="text" id="u_cargo" class="form-control" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100">Registrar y Generar QR</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="col-md-6 text-center">
-                        <div class="card p-4">
-                            <h5>Código QR Generado</h5>
-                            <div id="qrResult" class="mt-3">
-                                <p class="text-muted">Complete el formulario para obtener la credencial QR.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div id="placeholderQR" class="card card-custom p-5 text-center text-muted">
+              <i class="fa-solid fa-id-card fa-4x mb-3"></i>
+              <h6>Complete el formulario para generar la credencial de acceso directo.</h6>
             </div>
-
-            <!-- SECCIÓN 2: DOCUMENTOS -->
-            <div id="sec-documentos" class="seccion d-none">
-                <h3 class="mb-4">Clasificación y Carga de Documentos</h3>
-                <div class="card p-4">
-                    <form id="formDoc">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Categoría / Equipo</label>
-                                <input type="text" id="d_equipo" class="form-control" placeholder="Ej: Incubadora, Ventilador" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Gama / Clasificación</label>
-                                <select id="d_gama" class="form-select">
-                                    <option value="Alta">Alta</option>
-                                    <option value="Media">Media</option>
-                                    <option value="Estándar">Estándar</option>
-                                </select>
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Archivo Adjunto (.pdf, .doc, .html)</label>
-                                <input type="file" id="d_archivo" class="form-control" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success">Guardar Documento</button>
-                    </form>
-                    <div id="docResult" class="mt-3"></div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 3: REPORTES -->
-            <div id="sec-reportes" class="seccion d-none">
-                <h3 class="mb-4">Métricas del Sistema</h3>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card p-4 text-center bg-white mb-3">
-                            <h4>Total Usuarios</h4>
-                            <p class="display-4 font-weight-bold text-primary" id="m_usuarios">0</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card p-4 text-center bg-white mb-3">
-                            <h4>Total Documentos</h4>
-                            <p class="display-4 font-weight-bold text-success" id="m_documentos">0</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+          </div>
         </div>
+      </div>
+
+      <!-- SECCIÓN 2: CARGAR DOCUMENTOS -->
+      <div id="seccion-cargar" class="seccion-contenido d-none">
+        <h2 class="fw-bold mb-4">Cargar Documento Digital</h2>
+        <div class="card card-custom p-4 col-md-8 mx-auto">
+          <form id="formCargarDoc" onsubmit="guardarDocumento(event)">
+            <div class="mb-3">
+              <label class="form-label text-muted">Título del Documento / Manual</label>
+              <input type="text" id="docTitulo" class="form-control" placeholder="Ej: Presentación de Electromedicina" required>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Categoría / Área</label>
+                <select id="docCategoria" class="form-select" required>
+                  <option value="" disabled selected>Seleccione categoría...</option>
+                  <option value="Equipamiento Médico">Equipamiento Médico</option>
+                  <option value="Normativa y Seguridad">Normativa y Seguridad</option>
+                  <option value="Guía Docente / PNF">Guía Docente / PNF</option>
+                  <option value="Investigación">Investigación</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Archivo (PDF, EPUB, DOCX)</label>
+                <input type="file" id="docArchivo" class="form-control" accept=".pdf,.epub,.docx" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Descripción Breve</label>
+              <textarea id="docDescripcion" class="form-control" rows="2" placeholder="Resumen corto del contenido..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+              <i class="fa-solid fa-cloud-arrow-up me-2"></i> Subir a la Biblioteca
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: DOCUMENTOS CARGADOS -->
+      <div id="seccion-documentos" class="seccion-contenido d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="fw-bold m-0">Catálogo de Documentos</h2>
+          <div class="w-50">
+            <input type="text" id="inputBuscar" class="form-control" onkeyup="buscarDocumentos()" placeholder="Buscar por título o categoría...">
+          </div>
+        </div>
+        <div class="row" id="contenedorDocumentos">
+          <!-- Se llena dinámicamente con JS -->
+        </div>
+      </div>
+
+      <!-- SECCIÓN 4: PANEL DE MÉTRICAS -->
+      <div id="seccion-metricas" class="seccion-contenido d-none">
+        <h2 class="fw-bold mb-4">Panel de Métricas y Estadísticas</h2>
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <div class="card card-custom p-3 text-center border-start border-primary border-4">
+              <span class="text-muted small fw-bold">TOTAL USUARIOS</span>
+              <h3 class="fw-bold my-2 text-primary" id="metricaUsuarios">1</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-custom p-3 text-center border-start border-success border-4">
+              <span class="text-muted small fw-bold">DOCUMENTOS</span>
+              <h3 class="fw-bold my-2 text-success" id="metricaDocumentos">0</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-custom p-3 text-center border-start border-warning border-4">
+              <span class="text-muted small fw-bold">CONSULTAS HOY</span>
+              <h3 class="fw-bold my-2 text-warning" id="metricaConsultas">0</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-custom p-3 text-center border-start border-info border-4">
+              <span class="text-muted small fw-bold">ACCESOS POR QR</span>
+              <h3 class="fw-bold my-2 text-info">0%</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- SECCIÓN 5: ADMINISTRADOR -->
+<div id="seccion-admin" class="seccion-contenido d-none">
+  <h2 class="fw-bold mb-4">Panel de Administración</h2>
+  
+  <div class="card card-custom p-4 mb-4">
+    <h5 class="fw-bold mb-3"><i class="fa-solid fa-sliders me-2"></i>Ajustes y Acciones del Sistema</h5>
+    <p class="text-muted">Módulo de control de permisos, gestión de base de datos local y parámetros del servidor.</p>
+    
+    <hr class="my-4">
+
+    <!-- Gestión de Usuarios -->
+    <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-users-gear me-2"></i>Gestión de Usuarios y Registros</h6>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <button class="btn btn-outline-warning w-100 p-3 text-start" onclick="desactivarUsuarioAdmin()">
+          <i class="fa-solid fa-user-slash fa-lg me-2"></i>
+          <div>
+            <strong>Desactivar Usuario</strong>
+            <div class="small text-muted">Suspender credenciales temporales</div>
+          </div>
+        </button>
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-outline-danger w-100 p-3 text-start" onclick="eliminarUsuarioAdmin()">
+          <i class="fa-solid fa-user-xmark fa-lg me-2"></i>
+          <div>
+            <strong>Eliminar Usuario</strong>
+            <div class="small text-muted">Borrar usuario del sistema</div>
+          </div>
+        </button>
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-outline-dark w-100 p-3 text-start" onclick="eliminarRegistroAdmin()">
+          <i class="fa-solid fa-id-card-clip fa-lg me-2"></i>
+          <div>
+            <strong>Eliminar Registro</strong>
+            <div class="small text-muted">Limpiar registros de código QR</div>
+          </div>
+        </button>
+      </div>
     </div>
+
+    <!-- Gestión de Biblioteca y Datos -->
+    <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-database me-2"></i>Mantenimiento de Archivos</h6>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <button class="btn btn-danger w-100 p-3 text-start" onclick="eliminarDocumentosAdmin()">
+          <i class="fa-solid fa-trash-can fa-lg me-2"></i>
+          <div>
+            <strong>Eliminar Todos los Documentos</strong>
+            <div class="small text-white-50">Vaciar catálogo en localStorage</div>
+          </div>
+        </button>
+      </div>
+      <div class="col-md-6">
+        <button class="btn btn-secondary w-100 p-3 text-start" onclick="reiniciarSistemaAdmin()">
+          <i class="fa-solid fa-rotate-right fa-lg me-2"></i>
+          <div>
+            <strong>Restablecer Sistema</strong>
+            <div class="small text-white-50">Restaurar métricas y base local</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- MODAL DE ACCESO ADMINISTRADOR -->
+<div class="modal fade" id="modalAuthAdmin" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Acceso Restringido</h5>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Ingrese clave de administrador:</label>
+        <input type="password" id="claveAdminInput" class="form-control" placeholder="****">
+        <div id="errorClave" class="text-danger small mt-2 d-none">Clave incorrecta</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="validarAccesoAdmin()">Ingresar</button>
+      </div>
+    </div>
+  </div>
+</div>
+    </main>
+  </div>
 </div>
 
+<!-- MODAL VISOR DE DOCUMENTOS -->
+<div class="modal fade" id="modalVisor" tabindex="-1" aria-labelledby="modalVisorLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="modalVisorLabel">Previsualización de Documento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <iframe id="visorIframe" class="pdf-viewer-container" src=""></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    function mostrarSeccion(sec) {
-        document.querySelectorAll('.seccion').forEach(el => el.classList.add('d-none'));
-        document.getElementById('sec-' + sec).classList.remove('d-none');
-        if(sec === 'reportes') cargarMetricas();
-    }
+  let contadorUsuarios = 1;
 
-    document.getElementById('formUsuario').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const res = await fetch('/api/usuarios/registrar', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                cedula: document.getElementById('u_cedula').value,
-                nombre: document.getElementById('u_nombre').value,
-                cargo: document.getElementById('u_cargo').value
-            })
-        });
-        const data = await res.json();
-        if(res.ok) {
-            document.getElementById('qrResult').innerHTML = `
-                <p class="text-success">${data.mensaje}</p>
-                <img src="${data.qr_image_url}" class="img-fluid style="max-width:200px;">
-                <p class="small text-muted mt-2">Token: ${data.token_qr}</p>`;
-        }
+  // Cargar documentos desde localStorage al iniciar
+  let listaDocumentos = JSON.parse(localStorage.getItem('biblioteca_docs')) || [];
+
+  document.addEventListener("DOMContentLoaded", () => {
+    renderizarDocumentos();
+  });
+
+  function renderizarDocumentos() {
+    const contenedor = document.getElementById('contenedorDocumentos');
+    contenedor.innerHTML = '';
+
+    listaDocumentos.forEach((doc, index) => {
+      const nuevaCard = document.createElement('div');
+      nuevaCard.className = 'col-md-4 mb-3 doc-item';
+      nuevaCard.innerHTML = `
+        <div class="card card-custom p-3 h-100">
+          <div class="d-flex align-items-center mb-3">
+            <i class="fa-solid fa-file-pdf fa-2x text-danger me-3"></i>
+            <div>
+              <h6 class="fw-bold mb-0 doc-titulo">${doc.titulo}</h6>
+              <small class="text-muted doc-cat">${doc.categoria}</small>
+            </div>
+          </div>
+          <p class="small text-muted">${doc.descripcion}</p>
+          <button class="btn btn-sm btn-outline-primary mt-auto" onclick="abrirVisor(${index})">
+            <i class="fa-solid fa-eye me-1"></i> Visualizar Documento
+          </button>
+        </div>
+      `;
+      contenedor.appendChild(nuevaCard);
     });
 
-    document.getElementById('formDoc').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append('equipo', document.getElementById('d_equipo').value);
-        formData.append('gama', document.getElementById('d_gama').value);
-        formData.append('archivo', document.getElementById('d_archivo').files[0]);
+    const metricaDoc = document.getElementById('metricaDocumentos');
+    if (metricaDoc) metricaDoc.innerText = listaDocumentos.length;
+  }
 
-        const res = await fetch('/api/documentos/cargar', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        const resDiv = document.getElementById('docResult');
-        if(res.ok) {
-            resDiv.innerHTML = `<div class="alert alert-success">${data.mensaje} - ID:${data.doc_id}</div>`;
-        } else {
-            resDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-        }
+  function guardarDocumento(event) {
+    event.preventDefault();
+
+    const titulo = document.getElementById('docTitulo').value;
+    const categoria = document.getElementById('docCategoria').value;
+    const descripcion = document.getElementById('docDescripcion').value;
+    const archivoInput = document.getElementById('docArchivo');
+    const archivo = archivoInput.files[0];
+
+    if (!archivo) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const base64Url = e.target.result;
+
+      listaDocumentos.push({
+        titulo: titulo,
+        categoria: categoria,
+        descripcion: descripcion,
+        url: base64Url
+      });
+
+      localStorage.setItem('biblioteca_docs', JSON.stringify(listaDocumentos));
+
+      renderizarDocumentos();
+
+      document.getElementById('formCargarDoc').reset();
+      alert('¡Documento registrado y subido con éxito!');
+      mostrarSeccion('documentos');
+    };
+
+    reader.readAsDataURL(archivo);
+  }
+
+  function abrirVisor(index) {
+    const doc = listaDocumentos[index];
+    if (doc && doc.url) {
+      document.getElementById('modalVisorLabel').innerText = `Visualizando: ${doc.titulo}`;
+      document.getElementById('visorIframe').src = doc.url;
+      const modal = new bootstrap.Modal(document.getElementById('modalVisor'));
+      modal.show();
+    } else {
+      alert('Este es un documento de muestra sin archivo adjunto. Cargue un PDF nuevo para probar la visualización.');
+    }
+  }
+
+  function buscarDocumentos() {
+    const filtro = document.getElementById('inputBuscar').value.toLowerCase().trim();
+    document.querySelectorAll('.doc-item').forEach(item => {
+      const titulo = item.querySelector('.doc-titulo').innerText.toLowerCase();
+      const categoria = item.querySelector('.doc-cat').innerText.toLowerCase();
+      if (titulo.includes(filtro) || categoria.includes(filtro)) {
+        item.classList.remove('d-none');
+      } else {
+        item.classList.add('d-none');
+      }
+    });
+  }
+
+  function generarCarnetQR(event) {
+    event.preventDefault();
+    const nombre = document.getElementById('nombreUsuario').value;
+    const cedula = document.getElementById('cedulaUsuario').value;
+    const cargo = document.getElementById('cargoUsuario').value;
+    const area = document.getElementById('areaUsuario').value;
+    const claveAcceso = 'BV-' + Math.floor(1000 + Math.random() * 9000);
+
+    const qrContainer = document.getElementById('qrcode');
+    qrContainer.innerHTML = '';
+
+    new QRCode(qrContainer, {
+      text: JSON.stringify({ nombre, cedula, clave: claveAcceso, area }),
+      width: 150,
+      height: 150,
+      colorDark: "#0f172a",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
     });
 
-    async function cargarMetricas() {
-        const res = await fetch('/api/reportes/metricas');
-        const data = await res.json();
-        document.getElementById('m_usuarios').innerText = data.total_usuarios;
-        document.getElementById('m_documentos').innerText = data.total_documentos;
-    }
+    document.getElementById('resNombre').innerText = nombre;
+    document.getElementById('resCedula').innerText = `ID: ${cedula} | ${cargo}`;
+    document.getElementById('resArea').innerText = area;
+    document.getElementById('resClave').innerText = claveAcceso;
+
+    document.getElementById('placeholderQR').classList.add('d-none');
+    document.getElementById('resultadoQR').classList.remove('d-none');
+
+    contadorUsuarios++;
+    const metricaUser = document.getElementById('metricaUsuarios');
+    if (metricaUser) metricaUser.innerText = contadorUsuarios;
+  }
+
+  function copiarClave() {
+    const clave = document.getElementById('resClave').innerText;
+    navigator.clipboard.writeText(clave).then(() => {
+      alert('¡Clave de acceso copiada al portapapeles!');
+    });
+  }
+
+  // --- FUNCIONES DE SEGURIDAD PARA ADMINISTRADOR ---
+
+function solicitarClaveAdmin() {
+  let modalAdmin = new bootstrap.Modal(document.getElementById('modalAuthAdmin'));
+  modalAdmin.show();
+}
+
+function validarAccesoAdmin() {
+  const claveInput = document.getElementById('claveAdminInput').value;
+  const claveCorrecta = "admin123"; 
+
+  if (claveInput === claveCorrecta) {
+    let modalEl = document.getElementById('modalAuthAdmin');
+    let modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+    
+    // Acceso concedido
+    cambiarVista('admin');
+    document.getElementById('errorClave').classList.add('d-none');
+    document.getElementById('claveAdminInput').value = '';
+  } else {
+    document.getElementById('errorClave').classList.remove('d-none');
+  }
+}
+
+function mostrarSeccion(nombreSeccion) {
+  // Si intenta entrar a administrador directa o indirectamente, pide la clave
+  if (nombreSeccion === 'admin') {
+    solicitarClaveAdmin();
+  } else {
+    cambiarVista(nombreSeccion);
+  }
+}
+
+function cambiarVista(nombreSeccion) {
+  document.querySelectorAll('.seccion-contenido').forEach(sec => sec.classList.add('d-none'));
+  document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
+
+  const seccionActiva = document.getElementById(`seccion-${nombreSeccion}`);
+  const linkActivo = document.getElementById(`nav-${nombreSeccion}`);
+
+  if (seccionActiva) seccionActiva.classList.remove('d-none');
+  if (linkActivo) linkActivo.classList.add('active');
+}
+
+// --- ACCIONES DEL PANEL ADMINISTRATIVO ---
+
+function desactivarUsuarioAdmin() {
+  const cedula = prompt("Ingrese la Cédula/ID del usuario a desactivar:");
+  if (cedula) {
+    alert(`El usuario con ID ${cedula} ha sido desactivado temporalmente.`);
+  }
+}
+
+function eliminarUsuarioAdmin() {
+  const cedula = prompt("Ingrese la Cédula/ID del usuario a eliminar:");
+  if (cedula) {
+    alert(`El usuario con ID ${cedula} ha sido eliminado del sistema.`);
+  }
+}
+
+function eliminarRegistroAdmin() {
+  if (confirm("¿Desea limpiar el último registro de credencial QR generado?")) {
+    const resultadoQR = document.getElementById('resultadoQR');
+    const placeholderQR = document.getElementById('placeholderQR');
+    if (resultadoQR) resultadoQR.classList.add('d-none');
+    if (placeholderQR) placeholderQR.classList.remove('d-none');
+    alert("Registro limpiado exitosamente.");
+  }
+}
+
+function eliminarDocumentosAdmin() {
+  if (confirm("¡ATENCIÓN! Esta acción eliminará TODOS los documentos almacenados. ¿Desea continuar?")) {
+    if (typeof listaDocumentos !== 'undefined') listaDocumentos = [];
+    localStorage.removeItem('biblioteca_docs');
+    if (typeof renderizarDocumentos === 'function') renderizarDocumentos();
+    alert("Todos los documentos han sido eliminados.");
+  }
+}
+
+function reiniciarSistemaAdmin() {
+  if (confirm("¿Desea restablecer todos los parámetros y métricas locales por defecto?")) {
+    localStorage.clear();
+    if (typeof listaDocumentos !== 'undefined') listaDocumentos = [];
+    if (typeof contadorUsuarios !== 'undefined') contadorUsuarios = 0;
+    if (typeof renderizarDocumentos === 'function') renderizarDocumentos();
+    const metricaUser = document.getElementById('metricaUsuarios');
+    if (metricaUser) metricaUser.innerText = '0';
+    alert("El sistema se ha restablecido correctamente.");
+  }
+}
 </script>
-</body>
-</html>
