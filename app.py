@@ -1,3 +1,12 @@
+# ==============================================================================
+# PROYECTO: SISTEMA DE BIBLIOTECA VIRTUAL VENSALUD
+# AUTORA: Iraida Josefina Mijares Ramírez
+# INSTITUCIÓN: VENSALUD, S.A.
+# AÑO: 2026
+# DESCRIPCIÓN: Plataforma de gestión documental, control de usuarios y QR
+#              para la consulta de manuales de equipos electromédicos.
+# ==============================================================================
+
 import os
 import uuid
 import hashlib
