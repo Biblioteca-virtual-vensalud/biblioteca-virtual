@@ -1,3 +1,10 @@
+<!--
+  PROYECTO: SISTEMA DE BIBLIOTECA VIRTUAL VENSALUD
+  AUTORA: Iraida Josefina Mijares Ramírez
+  INSTITUCIÓN: VENSALUD, S.A.
+  AÑO: 2026
+  DESCRIPCIÓN: Interfaz principal para la consulta de manuales, registro de usuarios y métricas.
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -214,90 +221,92 @@
         </div>
       </div>
 
-    <!-- SECCIÓN 5: ADMINISTRADOR -->
-<div id="seccion-admin" class="seccion-contenido d-none">
-  <h2 class="fw-bold mb-4">Panel de Administración</h2>
-  
-  <div class="card card-custom p-4 mb-4">
-    <h5 class="fw-bold mb-3"><i class="fa-solid fa-sliders me-2"></i>Ajustes y Acciones del Sistema</h5>
-    <p class="text-muted">Módulo de control de permisos, gestión de base de datos local y parámetros del servidor.</p>
-    
-    <hr class="my-4">
+      <!-- SECCIÓN 5: ADMINISTRADOR -->
+      <div id="seccion-admin" class="seccion-contenido d-none">
+        <h2 class="fw-bold mb-4">Panel de Administración</h2>
+        
+        <div class="card card-custom p-4 mb-4">
+          <h5 class="fw-bold mb-3"><i class="fa-solid fa-sliders me-2"></i>Ajustes y Acciones del Sistema</h5>
+          <p class="text-muted">Módulo de control de permisos, gestión de base de datos local y parámetros del servidor.</p>
+          
+          <hr class="my-4">
 
-    <!-- Gestión de Usuarios -->
-    <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-users-gear me-2"></i>Gestión de Usuarios y Registros</h6>
-    <div class="row g-3 mb-4">
-      <div class="col-md-4">
-        <button class="btn btn-outline-warning w-100 p-3 text-start" onclick="desactivarUsuarioAdmin()">
-          <i class="fa-solid fa-user-slash fa-lg me-2"></i>
-          <div>
-            <strong>Desactivar Usuario</strong>
-            <div class="small text-muted">Suspender credenciales temporales</div>
+          <!-- Gestión de Usuarios -->
+          <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-users-gear me-2"></i>Gestión de Usuarios y Registros</h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <button class="btn btn-outline-warning w-100 p-3 text-start" onclick="desactivarUsuarioAdmin()">
+                <i class="fa-solid fa-user-slash fa-lg me-2"></i>
+                <div>
+                  <strong>Desactivar Usuario</strong>
+                  <div class="small text-muted">Suspender credenciales temporales</div>
+                </div>
+              </button>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-outline-danger w-100 p-3 text-start" onclick="eliminarUsuarioAdmin()">
+                <i class="fa-solid fa-user-xmark fa-lg me-2"></i>
+                <div>
+                  <strong>Eliminar Usuario</strong>
+                  <div class="small text-muted">Borrar usuario del sistema</div>
+                </div>
+              </button>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-outline-dark w-100 p-3 text-start" onclick="eliminarRegistroAdmin()">
+                <i class="fa-solid fa-id-card-clip fa-lg me-2"></i>
+                <div>
+                  <strong>Eliminar Registro</strong>
+                  <div class="small text-muted">Limpiar registros de código QR</div>
+                </div>
+              </button>
+            </div>
           </div>
-        </button>
-      </div>
-      <div class="col-md-4">
-        <button class="btn btn-outline-danger w-100 p-3 text-start" onclick="eliminarUsuarioAdmin()">
-          <i class="fa-solid fa-user-xmark fa-lg me-2"></i>
-          <div>
-            <strong>Eliminar Usuario</strong>
-            <div class="small text-muted">Borrar usuario del sistema</div>
-          </div>
-        </button>
-      </div>
-      <div class="col-md-4">
-        <button class="btn btn-outline-dark w-100 p-3 text-start" onclick="eliminarRegistroAdmin()">
-          <i class="fa-solid fa-id-card-clip fa-lg me-2"></i>
-          <div>
-            <strong>Eliminar Registro</strong>
-            <div class="small text-muted">Limpiar registros de código QR</div>
-          </div>
-        </button>
-      </div>
-    </div>
 
-    <!-- Gestión de Biblioteca y Datos -->
-    <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-database me-2"></i>Mantenimiento de Archivos</h6>
-    <div class="row g-3">
-      <div class="col-md-6">
-        <button class="btn btn-danger w-100 p-3 text-start" onclick="eliminarDocumentosAdmin()">
-          <i class="fa-solid fa-trash-can fa-lg me-2"></i>
-          <div>
-            <strong>Eliminar Todos los Documentos</strong>
-            <div class="small text-white-50">Vaciar catálogo en localStorage</div>
+          <!-- Gestión de Biblioteca y Datos -->
+          <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-database me-2"></i>Mantenimiento de Archivos</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <button class="btn btn-danger w-100 p-3 text-start" onclick="eliminarDocumentosAdmin()">
+                <i class="fa-solid fa-trash-can fa-lg me-2"></i>
+                <div>
+                  <strong>Eliminar Todos los Documentos</strong>
+                  <div class="small text-white-50">Vaciar catálogo en localStorage</div>
+                </div>
+              </button>
+            </div>
+            <div class="col-md-6">
+              <button class="btn btn-secondary w-100 p-3 text-start" onclick="reiniciarSistemaAdmin()">
+                <i class="fa-solid fa-rotate-right fa-lg me-2"></i>
+                <div>
+                  <strong>Restablecer Sistema</strong>
+                  <div class="small text-white-50">Restaurar métricas y base local</div>
+                </div>
+              </button>
+            </div>
           </div>
-        </button>
+        </div>
       </div>
-      <div class="col-md-6">
-        <button class="btn btn-secondary w-100 p-3 text-start" onclick="reiniciarSistemaAdmin()">
-          <i class="fa-solid fa-rotate-right fa-lg me-2"></i>
-          <div>
-            <strong>Restablecer Sistema</strong>
-            <div class="small text-white-50">Restaurar métricas y base local</div>
+
+      <!-- MODAL DE ACCESO ADMINISTRADOR -->
+      <div class="modal fade" id="modalAuthAdmin" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Acceso Restringido</h5>
+            </div>
+            <div class="modal-body">
+              <label class="form-label">Ingrese clave de administrador:</label>
+              <input type="password" id="claveAdminInput" class="form-control" placeholder="****">
+              <div id="errorClave" class="text-danger small mt-2 d-none">Clave incorrecta</div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" onclick="validarAccesoAdmin()">Ingresar</button>
+            </div>
           </div>
-        </button>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
-<!-- MODAL DE ACCESO ADMINISTRADOR -->
-<div class="modal fade" id="modalAuthAdmin" data-bs-backdrop="static" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Acceso Restringido</h5>
-      </div>
-      <div class="modal-body">
-        <label class="form-label">Ingrese clave de administrador:</label>
-        <input type="password" id="claveAdminInput" class="form-control" placeholder="****">
-        <div id="errorClave" class="text-danger small mt-2 d-none">Clave incorrecta</div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="validarAccesoAdmin()">Ingresar</button>
-      </div>
-    </div>
-  </div>
-</div>
+
     </main>
   </div>
 </div>
@@ -458,107 +467,107 @@
     });
   }
 
- // --- FUNCIONES DE SEGURIDAD PARA ADMINISTRADOR ---
+  // --- FUNCIONES DE SEGURIDAD PARA ADMINISTRADOR ---
 
-function solicitarClaveAdmin() {
-  let modalAdmin = new bootstrap.Modal(document.getElementById('modalAuthAdmin'));
-  modalAdmin.show();
-}
+  function solicitarClaveAdmin() {
+    let modalAdmin = new bootstrap.Modal(document.getElementById('modalAuthAdmin'));
+    modalAdmin.show();
+  }
 
-async function validarAccesoAdmin() {
-  const claveInput = document.getElementById('claveAdminInput').value;
+  async function validarAccesoAdmin() {
+    const claveInput = document.getElementById('claveAdminInput').value;
 
-  try {
-    const respuesta = await fetch('/validar-admin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clave: claveInput })
-    });
+    try {
+      const respuesta = await fetch('/validar-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clave: claveInput })
+      });
 
-    const resultado = await respuesta.json();
+      const resultado = await respuesta.json();
 
-    if (resultado.exito) {
-      let modalEl = document.getElementById('modalAuthAdmin');
-      let modal = bootstrap.Modal.getInstance(modalEl);
-      modal.hide();
+      if (resultado.exito) {
+        let modalEl = document.getElementById('modalAuthAdmin');
+        let modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
 
-      // Acceso concedido
-      cambiarVista('admin');
-      document.getElementById('errorClave').classList.add('d-none');
-      document.getElementById('claveAdminInput').value = '';
-    } else {
+        cambiarVista('admin');
+        document.getElementById('errorClave').classList.add('d-none');
+        document.getElementById('claveAdminInput').value = '';
+      } else {
+        document.getElementById('errorClave').classList.remove('d-none');
+      }
+    } catch (error) {
+      console.error('Error al validar la clave:', error);
       document.getElementById('errorClave').classList.remove('d-none');
     }
-  } catch (error) {
-    console.error('Error al validar la clave:', error);
-    document.getElementById('errorClave').classList.remove('d-none');
   }
-}
 
-function mostrarSeccion(nombreSeccion) {
-  // Si intenta entrar a administrador directa o indirectamente, pide la clave
-  if (nombreSeccion === 'admin') {
-    solicitarClaveAdmin();
-  } else {
-    cambiarVista(nombreSeccion);
+  function mostrarSeccion(nombreSeccion) {
+    if (nombreSeccion === 'admin') {
+      solicitarClaveAdmin();
+    } else {
+      cambiarVista(nombreSeccion);
+    }
   }
-}
 
-function cambiarVista(nombreSeccion) {
-  document.querySelectorAll('.seccion-contenido').forEach(sec => sec.classList.add('d-none'));
-  document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
+  function cambiarVista(nombreSeccion) {
+    document.querySelectorAll('.seccion-contenido').forEach(sec => sec.classList.add('d-none'));
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
 
-  const seccionActiva = document.getElementById(`seccion-${nombreSeccion}`);
-  const linkActivo = document.getElementById(`nav-${nombreSeccion}`);
+    const seccionActiva = document.getElementById(`seccion-${nombreSeccion}`);
+    const linkActivo = document.getElementById(`nav-${nombreSeccion}`);
 
-  if (seccionActiva) seccionActiva.classList.remove('d-none');
-  if (linkActivo) linkActivo.classList.add('active');
-}
-
-// --- ACCIONES DEL PANEL ADMINISTRATIVO ---
-
-function desactivarUsuarioAdmin() {
-  const cedula = prompt("Ingrese la Cédula/ID del usuario a desactivar:");
-  if (cedula) {
-    alert(`El usuario con ID ${cedula} ha sido desactivado temporalmente.`);
+    if (seccionActiva) seccionActiva.classList.remove('d-none');
+    if (linkActivo) linkActivo.classList.add('active');
   }
-}
 
-function eliminarUsuarioAdmin() {
-  const cedula = prompt("Ingrese la Cédula/ID del usuario a eliminar:");
-  if (cedula) {
-    alert(`El usuario con ID ${cedula} ha sido eliminado del sistema.`);
-  }
-}
+  // --- ACCIONES DEL PANEL ADMINISTRATIVO ---
 
-function eliminarRegistroAdmin() {
-  if (confirm("¿Desea limpiar el último registro de credencial QR generado?")) {
-    const resultadoQR = document.getElementById('resultadoQR');
-    const placeholderQR = document.getElementById('placeholderQR');
-    if (resultadoQR) resultadoQR.classList.add('d-none');
-    if (placeholderQR) placeholderQR.classList.remove('d-none');
-    alert("Registro limpiado exitosamente.");
+  function desactivarUsuarioAdmin() {
+    const cedula = prompt("Ingrese la Cédula/ID del usuario a desactivar:");
+    if (cedula) {
+      alert(`El usuario con ID ${cedula} ha sido desactivado temporalmente.`);
+    }
   }
-}
 
-function eliminarDocumentosAdmin() {
-  if (confirm("¡ATENCIÓN! Esta acción eliminará TODOS los documentos almacenados. ¿Desea continuar?")) {
-    if (typeof listaDocumentos !== 'undefined') listaDocumentos = [];
-    localStorage.removeItem('biblioteca_docs');
-    if (typeof renderizarDocumentos === 'function') renderizarDocumentos();
-    alert("Todos los documentos han sido eliminados.");
+  function eliminarUsuarioAdmin() {
+    const cedula = prompt("Ingrese la Cédula/ID del usuario a eliminar:");
+    if (cedula) {
+      alert(`El usuario con ID ${cedula} ha sido eliminado del sistema.`);
+    }
   }
-}
 
-function reiniciarSistemaAdmin() {
-  if (confirm("¿Desea restablecer todos los parámetros y métricas locales por defecto?")) {
-    localStorage.clear();
-    if (typeof listaDocumentos !== 'undefined') listaDocumentos = [];
-    if (typeof contadorUsuarios !== 'undefined') contadorUsuarios = 0;
-    if (typeof renderizarDocumentos === 'function') renderizarDocumentos();
-    const metricaUser = document.getElementById('metricaUsuarios');
-    if (metricaUser) metricaUser.innerText = '0';
-    alert("El sistema se ha restablecido correctamente.");
+  function eliminarRegistroAdmin() {
+    if (confirm("¿Desea limpiar el último registro de credencial QR generado?")) {
+      const resultadoQR = document.getElementById('resultadoQR');
+      const placeholderQR = document.getElementById('placeholderQR');
+      if (resultadoQR) resultadoQR.classList.add('d-none');
+      if (placeholderQR) placeholderQR.classList.remove('d-none');
+      alert("Registro limpiado exitosamente.");
+    }
   }
-}
+
+  function eliminarDocumentosAdmin() {
+    if (confirm("¡ATENCIÓN! Esta acción eliminará TODOS los documentos almacenados. ¿Desea continuar?")) {
+      if (typeof listaDocumentos !== 'undefined') listaDocumentos = [];
+      localStorage.removeItem('biblioteca_docs');
+      if (typeof renderizarDocumentos === 'function') renderizarDocumentos();
+      alert("Todos los documentos han sido eliminados.");
+    }
+  }
+
+  function reiniciarSistemaAdmin() {
+    if (confirm("¿Desea restablecer todos los parámetros y métricas locales por defecto?")) {
+      localStorage.clear();
+      if (typeof listaDocumentos !== 'undefined') listaDocumentos = [];
+      if (typeof contadorUsuarios !== 'undefined') contadorUsuarios = 0;
+      if (typeof renderizarDocumentos === 'function') renderizarDocumentos();
+      const metricaUser = document.getElementById('metricaUsuarios');
+      if (metricaUser) metricaUser.innerText = '0';
+      alert("El sistema se ha restablecido correctamente.");
+    }
+  }
 </script>
+</body>
+</html>
