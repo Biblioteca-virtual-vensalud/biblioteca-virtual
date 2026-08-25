@@ -1,8 +1,9 @@
 import os
+import uuid
 import hashlib
 import qrcode
 from datetime import datetime
-from flask import Flask, request, jsonify, render_template, render_template_string, Response, abort, redirect, url_for, session
+from flask import Flask, request, jsonify, render_template, render_template_string, Response, abort, redirect, url_for, session, send_from_directory
 
 app = Flask(__name__)
 app.secret_key = 'clave_secreta_biblioteca'  # Necesario para gestionar la sesión del usuario
@@ -28,8 +29,6 @@ def inicio():
     return render_template('index.html')
 
 # --- MÓDULO: AUTENTICACIÓN ADMIN ---
-
-ADMIN_PASSWORD = "admin123"  # Modifica esta clave según prefieras
 
 @app.route('/validar-admin', methods=['POST'])
 def validar_admin():
@@ -68,10 +67,12 @@ def login():
 def logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('login'))
-# MÓDULO: REGISTRO DE USUARIOS
+
+# --- MÓDULO: REGISTRO DE USUARIOS ---
+
 @app.route('/api/usuarios/registrar', methods=['POST'])
 def registrar_usuario():
-    data = request.json
+    data = request.json or {}
     user_id = data.get('cedula')
     nombre = data.get('nombre')
     cargo = data.get('cargo')
@@ -108,8 +109,8 @@ def registrar_usuario():
         "qr_image_url": f"/static/qr_codes/{qr_filename}"
     }), 201
 
+# --- MÓDULO: VERIFICAR USUARIO POR QR (ACCESO A BIBLIOTECA) ---
 
-# MÓDULO: VERIFICAR USUARIO POR QR (ACCESO A BIBLIOTECA)
 @app.route('/usuario/<token_qr>', methods=['GET'])
 def obtener_usuario_qr(token_qr):
     usuario = DB.get("usuarios", {}).get(token_qr)
@@ -130,14 +131,14 @@ def obtener_usuario_qr(token_qr):
         "usuario": usuario
     }), 200
 
+# --- MÓDULO ADMINISTRATIVO: CAMBIAR ESTADO / ELIMINAR (PROTEGIDO) ---
 
-# MÓDULO ADMINISTRATIVO: CAMBIAR ESTADO / ELIMINAR (PROTEGIDO)
 @app.route('/api/admin/usuarios/estado', methods=['POST'])
 def cambiar_estado_usuario():
     if not session.get('admin_logged_in'):
         return jsonify({"error": "No autorizado"}), 401
 
-    data = request.json
+    data = request.json or {}
     token_qr = data.get('token_qr')
     nuevo_estado = data.get('estado')
 
@@ -149,7 +150,6 @@ def cambiar_estado_usuario():
         }), 200
 
     return jsonify({"error": "Usuario no encontrado"}), 404
-
 
 @app.route('/api/admin/usuarios/eliminar/<token_qr>', methods=['DELETE'])
 def eliminar_usuario_admin(token_qr):
@@ -188,14 +188,33 @@ def obtener_todos_usuarios():
         
     return jsonify({"usuarios": lista_usuarios}), 200
 
-# MÓDULO: CARGA DE DOCUMENTOS
-# Guarda en la BD
+# --- MÓDULO: CARGA DE DOCUMENTOS ---
+
+@app.route('/api/documentos/cargar', methods=['POST'])
+def cargar_documento():
+    if 'archivo' not in request.files:
+        return jsonify({"error": "No se subió ningún archivo"}), 400
+
+    archivo = request.files['archivo']
+    equipo = request.form.get('equipo', 'General')
+    gama = request.form.get('gama', 'General')
+
+    if archivo.filename == '':
+        return jsonify({"error": "Nombre de archivo no válido"}), 400
+
+    doc_id = str(uuid.uuid4())[:8]
+    ext = os.path.splitext(archivo.filename)[1]
+    nombre_archivo = f"{doc_id}_{archivo.filename}"
+    ruta_guardado = os.path.join(UPLOAD_FOLDER, nombre_archivo)
+    archivo.save(ruta_guardado)
+
+    # Guarda en la BD
     DB["documentos"][doc_id] = {
-        "nombre": nombre_archivo,
+        "nombre": archivo.filename,
         "equipo": equipo,
         "gama": gama,
         "ext": ext,
-        "ruta": f"/archivos/{doc_id}_{nombre_archivo}"
+        "ruta": f"/archivos/{nombre_archivo}"
     }
 
     return jsonify({
@@ -203,7 +222,7 @@ def obtener_todos_usuarios():
         "doc_id": doc_id,
         "equipo": equipo,
         "gama": gama,
-        "ruta": f"/archivos/{doc_id}_{nombre_archivo}"
+        "ruta": f"/archivos/{nombre_archivo}"
     }), 201
 
 @app.route('/api/documentos/listar', methods=['GET'])
@@ -216,13 +235,12 @@ def listar_documentos():
     return jsonify({"documentos": lista}), 200
 
 # RUTA FUNDAMENTAL PARA ABRIR Y VISUALIZAR LOS ARCHIVOS
-from flask import send_from_directory
-
 @app.route('/archivos/<path:filename>')
 def ver_archivo(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-# MÓDULO: REPORTES
+# --- MÓDULO: REPORTES ---
+
 @app.route('/api/reportes/metricas', methods=['GET'])
 def obtener_metricas():
     return jsonify({
