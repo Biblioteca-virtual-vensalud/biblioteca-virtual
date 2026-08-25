@@ -36,3 +36,95 @@
                 <button onclick="verificarClave()" class="btn btn-primary w-100">Ingresar al Panel</button>
                 <div id="loginError" class="text-danger mt-2"></div>
             </div>
+
+            <!-- PANEL DE CONTROL DE USUARIOS -->
+            <div id="adminPanel" style="display: none;">
+                <h2>Gestión Central de Trabajadores 🛠️</h2>
+                <p class="text-muted">Control de altas, desactivaciones y revocación de accesos.</p>
+                
+                <table class="table table-striped table-hover mt-4 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Cédula / ID</th>
+                            <th>Nombre Completo</th>
+                            <th>Cargo / Área</th>
+                            <th>Estatus</th>
+                            <th>Visitas</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaUsuarios">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const CLAVE_CORRECTA = "Mer49Rau52Aye14Die24_Ira72*";
+
+    function verificarClave() {
+        const inputKey = document.getElementById('adminKey').value;
+        if (inputKey === CLAVE_CORRECTA) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            cargarUsuarios();
+        } else {
+            document.getElementById('loginError').innerText = "Clave incorrecta. Acceso denegado.";
+        }
+    }
+
+    async function cargarUsuarios() {
+        const res = await fetch('/api/admin/usuarios');
+        const data = await res.json();
+        const tbody = document.getElementById('tablaUsuarios');
+        tbody.innerHTML = '';
+
+        data.usuarios.forEach(u => {
+            const esActivo = u.estado === 'Activo';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>${u.nombre}</td>
+                    <td>${u.cargo || 'N/A'}</td>
+                    <td>
+                        <span class="badge ${esActivo ? 'bg-success' : 'bg-secondary'}">${u.estado}</span>
+                    </td>
+                    <td>${u.visitas}</td>
+                    <td>
+                        <button onclick="cambiarEstado('${u.token_qr}', '${esActivo ? 'Inactivo' : 'Activo'}')" 
+                                class="btn btn-sm ${esActivo ? 'btn-warning' : 'btn-success'} me-1">
+                            ${esActivo ? 'Desactivar ⏸️' : 'Activar ▶️'}
+                        </button>
+                        <button onclick="eliminarUsuario('${u.token_qr}')" class="btn btn-sm btn-danger">
+                            Eliminar 🗑️
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function cambiarEstado(token_qr, nuevoEstado) {
+        await fetch('/api/admin/usuarios/estado', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ token_qr: token_qr, estado: nuevoEstado })
+        });
+        cargarUsuarios();
+    }
+
+    async function eliminarUsuario(token_qr) {
+        if (confirm("¿Está segura de revocar y eliminar este usuario definitivamente?")) {
+            await fetch(`/api/admin/usuarios/eliminar/${token_qr}`, { method: 'DELETE' });
+            cargarUsuarios();
+        }
+    }
+window.onload = cargarUsuarios;
+</script>
+
+</body>
+</html>
