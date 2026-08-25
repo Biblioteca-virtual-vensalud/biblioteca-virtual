@@ -176,42 +176,38 @@ def obtener_todos_usuarios():
     return jsonify({"usuarios": lista_usuarios}), 200
 
 # MÓDULO: CARGA DE DOCUMENTOS
-@app.route('/api/documentos/cargar', methods=['POST'])
-def cargar_documento():
-    if 'archivo' not in request.files:
-        return jsonify({"error": "No se envió ningún archivo"}), 400
-
-    archivo = request.files['archivo']
-    equipo = request.form.get('equipo', 'General')
-    gama = request.form.get('gama', 'Estándar')
-
-    nombre_archivo = archivo.filename
-    ext = nombre_archivo.split('.')[-1].lower()
-
-    if ext not in ['html', 'pdf', 'doc', 'docx']:
-        return jsonify({"error": "Formato de archivo no permitido"}), 400
-
-    doc_id = str(len(DB["documentos"]) + 1)
-    subfolder = os.path.join(UPLOAD_FOLDER, equipo, gama)
-    os.makedirs(subfolder, exist_ok=True)
-    
-    file_path = os.path.join(subfolder, f"{doc_id}_{nombre_archivo}")
-    archivo.save(file_path)
-
+# Guarda en la BD
     DB["documentos"][doc_id] = {
         "nombre": nombre_archivo,
         "equipo": equipo,
         "gama": gama,
         "ext": ext,
-        "ruta": file_path
+        "ruta": f"/archivos/{doc_id}_{nombre_archivo}"
     }
 
     return jsonify({
         "mensaje": "Documento clasificado y guardado",
         "doc_id": doc_id,
         "equipo": equipo,
-        "gama": gama
+        "gama": gama,
+        "ruta": f"/archivos/{doc_id}_{nombre_archivo}"
     }), 201
+
+@app.route('/api/documentos/listar', methods=['GET'])
+def listar_documentos():
+    lista = []
+    for doc_id, datos in DB.get("documentos", {}).items():
+        doc_info = datos.copy()
+        doc_info["id"] = doc_id
+        lista.append(doc_info)
+    return jsonify({"documentos": lista}), 200
+
+# RUTA FUNDAMENTAL PARA ABRIR Y VISUALIZAR LOS ARCHIVOS
+from flask import send_from_directory
+
+@app.route('/archivos/<path:filename>')
+def ver_archivo(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 # MÓDULO: REPORTES
 @app.route('/api/reportes/metricas', methods=['GET'])
