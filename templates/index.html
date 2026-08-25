@@ -10,7 +10,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Biblioteca Virtual</title>
+  <title>Sistema de Biblioteca Virtual - VENSALUD</title>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- FontAwesome Icons -->
@@ -33,8 +33,8 @@
   <div class="row">
     <!-- Navegación Lateral -->
     <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
-      <div class="p-3 fs-4 fw-bold border-bottom border-secondary text-white">
-        Biblioteca Virtual
+      <div class="p-3 fs-5 fw-bold border-bottom border-secondary text-white text-center">
+        <i class="fa-solid fa-book-bookmark me-2"></i>Biblioteca Virtual
       </div>
       <ul class="nav flex-column mt-3">
         <li class="nav-item">
@@ -148,7 +148,7 @@
           <form id="formCargarDoc" onsubmit="guardarDocumento(event)">
             <div class="mb-3">
               <label class="form-label text-muted">Título del Documento / Manual</label>
-              <input type="text" id="docTitulo" class="form-control" placeholder="Ej: Presentación de Electromedicina" required>
+              <input type="text" id="docTitulo" class="form-control" placeholder="Ej: Manual Quirúrgico" required>
             </div>
             <div class="row">
               <div class="col-md-6 mb-3">
@@ -186,7 +186,7 @@
           </div>
         </div>
         <div class="row" id="contenedorDocumentos">
-          <!-- Se llena dinámicamente con JS -->
+          <!-- Se llena dinámicamente -->
         </div>
       </div>
 
@@ -197,7 +197,7 @@
           <div class="col-md-3">
             <div class="card card-custom p-3 text-center border-start border-primary border-4">
               <span class="text-muted small fw-bold">TOTAL USUARIOS</span>
-              <h3 class="fw-bold my-2 text-primary" id="metricaUsuarios">1</h3>
+              <h3 class="fw-bold my-2 text-primary" id="metricaUsuarios">0</h3>
             </div>
           </div>
           <div class="col-md-3">
@@ -215,7 +215,7 @@
           <div class="col-md-3">
             <div class="card card-custom p-3 text-center border-start border-info border-4">
               <span class="text-muted small fw-bold">ACCESOS POR QR</span>
-              <h3 class="fw-bold my-2 text-info">0%</h3>
+              <h3 class="fw-bold my-2 text-info" id="metricaQR">0%</h3>
             </div>
           </div>
         </div>
@@ -224,14 +224,11 @@
       <!-- SECCIÓN 5: ADMINISTRADOR -->
       <div id="seccion-admin" class="seccion-contenido d-none">
         <h2 class="fw-bold mb-4">Panel de Administración</h2>
-        
         <div class="card card-custom p-4 mb-4">
           <h5 class="fw-bold mb-3"><i class="fa-solid fa-sliders me-2"></i>Ajustes y Acciones del Sistema</h5>
           <p class="text-muted">Módulo de control de permisos, gestión de base de datos local y parámetros del servidor.</p>
-          
           <hr class="my-4">
 
-          <!-- Gestión de Usuarios -->
           <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-users-gear me-2"></i>Gestión de Usuarios y Registros</h6>
           <div class="row g-3 mb-4">
             <div class="col-md-4">
@@ -239,7 +236,7 @@
                 <i class="fa-solid fa-user-slash fa-lg me-2"></i>
                 <div>
                   <strong>Desactivar Usuario</strong>
-                  <div class="small text-muted">Suspender credenciales temporales</div>
+                  <div class="small text-muted">Suspender credenciales</div>
                 </div>
               </button>
             </div>
@@ -257,13 +254,12 @@
                 <i class="fa-solid fa-id-card-clip fa-lg me-2"></i>
                 <div>
                   <strong>Eliminar Registro</strong>
-                  <div class="small text-muted">Limpiar registros de código QR</div>
+                  <div class="small text-muted">Limpiar vista de carnet QR</div>
                 </div>
               </button>
             </div>
           </div>
 
-          <!-- Gestión de Biblioteca y Datos -->
           <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-database me-2"></i>Mantenimiento de Archivos</h6>
           <div class="row g-3">
             <div class="col-md-6">
@@ -298,9 +294,10 @@
             <div class="modal-body">
               <label class="form-label">Ingrese clave de administrador:</label>
               <input type="password" id="claveAdminInput" class="form-control" placeholder="****">
-              <div id="errorClave" class="text-danger small mt-2 d-none">Clave incorrecta</div>
+              <div id="errorClave" class="text-danger small mt-2 d-none">Clave incorrecta. Intente de nuevo.</div>
             </div>
             <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
               <button type="button" class="btn btn-primary" onclick="validarAccesoAdmin()">Ingresar</button>
             </div>
           </div>
@@ -312,7 +309,7 @@
 </div>
 
 <!-- MODAL VISOR DE DOCUMENTOS -->
-<div class="modal fade" id="modalVisor" tabindex="-1" aria-labelledby="modalVisorLabel" aria-hidden="true">
+<div class="modal fade" id="modalVisor" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
@@ -330,18 +327,38 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  let contadorUsuarios = 1;
-
-  // Cargar documentos desde localStorage al iniciar
+  let contadorUsuarios = parseInt(localStorage.getItem('biblioteca_usuarios_cnt')) || 0;
+  let contadorConsultas = parseInt(localStorage.getItem('biblioteca_consultas_cnt')) || 0;
   let listaDocumentos = JSON.parse(localStorage.getItem('biblioteca_docs')) || [];
 
   document.addEventListener("DOMContentLoaded", () => {
     renderizarDocumentos();
+    actualizarMetricas();
   });
+
+  function actualizarMetricas() {
+    const elUser = document.getElementById('metricaUsuarios');
+    const elDoc = document.getElementById('metricaDocumentos');
+    const elConsultas = document.getElementById('metricaConsultas');
+    
+    if (elUser) elUser.innerText = contadorUsuarios;
+    if (elDoc) elDoc.innerText = listaDocumentos.length;
+    if (elConsultas) elConsultas.innerText = contadorConsultas;
+  }
 
   function renderizarDocumentos() {
     const contenedor = document.getElementById('contenedorDocumentos');
     contenedor.innerHTML = '';
+
+    if (listaDocumentos.length === 0) {
+      contenedor.innerHTML = `
+        <div class="col-12 text-center text-muted py-5">
+          <i class="fa-solid fa-folder-open fa-3x mb-3"></i>
+          <h6>No hay documentos subidos en la biblioteca.</h6>
+        </div>`;
+      actualizarMetricas();
+      return;
+    }
 
     listaDocumentos.forEach((doc, index) => {
       const nuevaCard = document.createElement('div');
@@ -364,8 +381,7 @@
       contenedor.appendChild(nuevaCard);
     });
 
-    const metricaDoc = document.getElementById('metricaDocumentos');
-    if (metricaDoc) metricaDoc.innerText = listaDocumentos.length;
+    actualizarMetricas();
   }
 
   function guardarDocumento(event) {
@@ -383,20 +399,16 @@
     reader.onload = function(e) {
       const base64Url = e.target.result;
 
-      listaDocumentos.push({
-        titulo: titulo,
-        categoria: categoria,
-        descripcion: descripcion,
-        url: base64Url
-      });
-
-      localStorage.setItem('biblioteca_docs', JSON.stringify(listaDocumentos));
-
-      renderizarDocumentos();
-
-      document.getElementById('formCargarDoc').reset();
-      alert('¡Documento registrado y subido con éxito!');
-      mostrarSeccion('documentos');
+      try {
+        listaDocumentos.push({ titulo, categoria, descripcion, url: base64Url });
+        localStorage.setItem('biblioteca_docs', JSON.stringify(listaDocumentos));
+        renderizarDocumentos();
+        document.getElementById('formCargarDoc').reset();
+        alert('¡Documento registrado y subido con éxito!');
+        mostrarSeccion('documentos');
+      } catch (err) {
+        alert('El archivo es demasiado grande para ser almacenado en la memoria local del navegador.');
+      }
     };
 
     reader.readAsDataURL(archivo);
@@ -405,12 +417,16 @@
   function abrirVisor(index) {
     const doc = listaDocumentos[index];
     if (doc && doc.url) {
+      contadorConsultas++;
+      localStorage.setItem('biblioteca_consultas_cnt', contadorConsultas);
+      actualizarMetricas();
+
       document.getElementById('modalVisorLabel').innerText = `Visualizando: ${doc.titulo}`;
       document.getElementById('visorIframe').src = doc.url;
       const modal = new bootstrap.Modal(document.getElementById('modalVisor'));
       modal.show();
     } else {
-      alert('Este es un documento de muestra sin archivo adjunto. Cargue un PDF nuevo para probar la visualización.');
+      alert('Error al intentar cargar la vista previa del documento.');
     }
   }
 
@@ -456,8 +472,8 @@
     document.getElementById('resultadoQR').classList.remove('d-none');
 
     contadorUsuarios++;
-    const metricaUser = document.getElementById('metricaUsuarios');
-    if (metricaUser) metricaUser.innerText = contadorUsuarios;
+    localStorage.setItem('biblioteca_usuarios_cnt', contadorUsuarios);
+    actualizarMetricas();
   }
 
   function copiarClave() {
@@ -467,38 +483,26 @@
     });
   }
 
-  // --- FUNCIONES DE SEGURIDAD PARA ADMINISTRADOR ---
+  // --- ADMINISTRACIÓN Y NAVEGACIÓN ---
 
   function solicitarClaveAdmin() {
     let modalAdmin = new bootstrap.Modal(document.getElementById('modalAuthAdmin'));
     modalAdmin.show();
   }
 
-  async function validarAccesoAdmin() {
+  function validarAccesoAdmin() {
     const claveInput = document.getElementById('claveAdminInput').value;
 
-    try {
-      const respuesta = await fetch('/validar-admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clave: claveInput })
-      });
+    // Validación local por defecto (clave: 1234) o conectar con API mediante fetch
+    if (claveInput === "1234") {
+      let modalEl = document.getElementById('modalAuthAdmin');
+      let modal = bootstrap.Modal.getInstance(modalEl);
+      modal.hide();
 
-      const resultado = await respuesta.json();
-
-      if (resultado.exito) {
-        let modalEl = document.getElementById('modalAuthAdmin');
-        let modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-
-        cambiarVista('admin');
-        document.getElementById('errorClave').classList.add('d-none');
-        document.getElementById('claveAdminInput').value = '';
-      } else {
-        document.getElementById('errorClave').classList.remove('d-none');
-      }
-    } catch (error) {
-      console.error('Error al validar la clave:', error);
+      cambiarVista('admin');
+      document.getElementById('errorClave').classList.add('d-none');
+      document.getElementById('claveAdminInput').value = '';
+    } else {
       document.getElementById('errorClave').classList.remove('d-none');
     }
   }
@@ -534,25 +538,26 @@
   function eliminarUsuarioAdmin() {
     const cedula = prompt("Ingrese la Cédula/ID del usuario a eliminar:");
     if (cedula) {
+      if (contadorUsuarios > 0) contadorUsuarios--;
+      localStorage.setItem('biblioteca_usuarios_cnt', contadorUsuarios);
+      actualizarMetricas();
       alert(`El usuario con ID ${cedula} ha sido eliminado del sistema.`);
     }
   }
 
   function eliminarRegistroAdmin() {
-    if (confirm("¿Desea limpiar el último registro de credencial QR generado?")) {
-      const resultadoQR = document.getElementById('resultadoQR');
-      const placeholderQR = document.getElementById('placeholderQR');
-      if (resultadoQR) resultadoQR.classList.add('d-none');
-      if (placeholderQR) placeholderQR.classList.remove('d-none');
+    if (confirm("¿Desea limpiar la vista de la última credencial QR?")) {
+      document.getElementById('resultadoQR').classList.add('d-none');
+      document.getElementById('placeholderQR').classList.remove('d-none');
       alert("Registro limpiado exitosamente.");
     }
   }
 
   function eliminarDocumentosAdmin() {
     if (confirm("¡ATENCIÓN! Esta acción eliminará TODOS los documentos almacenados. ¿Desea continuar?")) {
-      if (typeof listaDocumentos !== 'undefined') listaDocumentos = [];
+      listaDocumentos = [];
       localStorage.removeItem('biblioteca_docs');
-      if (typeof renderizarDocumentos === 'function') renderizarDocumentos();
+      renderizarDocumentos();
       alert("Todos los documentos han sido eliminados.");
     }
   }
@@ -560,11 +565,11 @@
   function reiniciarSistemaAdmin() {
     if (confirm("¿Desea restablecer todos los parámetros y métricas locales por defecto?")) {
       localStorage.clear();
-      if (typeof listaDocumentos !== 'undefined') listaDocumentos = [];
-      if (typeof contadorUsuarios !== 'undefined') contadorUsuarios = 0;
-      if (typeof renderizarDocumentos === 'function') renderizarDocumentos();
-      const metricaUser = document.getElementById('metricaUsuarios');
-      if (metricaUser) metricaUser.innerText = '0';
+      listaDocumentos = [];
+      contadorUsuarios = 0;
+      contadorConsultas = 0;
+      renderizarDocumentos();
+      actualizarMetricas();
       alert("El sistema se ha restablecido correctamente.");
     }
   }
