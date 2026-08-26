@@ -1,7 +1,7 @@
 <!--
   PROYECTO: SISTEMA DE BIBLIOTECA VIRTUAL VENSALUD
   AUTORA: Iraida Josefina Mijares Ramírez
-  INSTITUCIÓN: VENSALUD, S.A.
+  INSTITUCON: VENSALUD, S.A.
   AÑO: 2026
   DESCRIPCIÓN: Interfaz principal para la consulta de manuales, registro/inicio de sesión de usuarios y métricas.
 -->
@@ -111,10 +111,10 @@
 
                 <div class="tab-content" id="authTabsContent">
                   
-                  <!-- Formulario 1: Iniciar Sesión -->
+                  <!-- Formulario 1: Iniciar Sesión (CON ONSUBMIT CORREGIDO) -->
                   <div class="tab-pane fade show active" id="tab-login" role="tabpanel">
                     <h5 class="fw-bold mb-3">Consultar Credencial Existente</h5>
-                    <form id="formLogin">
+                    <form id="formLogin" onsubmit="event.preventDefault(); iniciarSesion();">
                       <div class="mb-3">
                         <label class="form-label">Cédula / Identificación</label>
                         <input type="text" id="loginCedula" class="form-control" placeholder="Ej: V-12345678">
@@ -129,7 +129,7 @@
                   <!-- Formulario 2: Nuevo Registro -->
                   <div class="tab-pane fade" id="tab-registro" role="tabpanel">
                     <h5 class="fw-bold mb-3">Formulario de Nuevo Registro</h5>
-                    <form id="formRegistro">
+                    <form id="formRegistro" onsubmit="event.preventDefault(); generarCredencial();">
                       <div class="mb-3">
                         <label class="form-label">Nombre Completo</label>
                         <input type="text" id="regNombre" class="form-control" placeholder="Ej: Ana Pérez">
@@ -242,11 +242,13 @@
           <h2 class="mb-4 text-primary fw-bold">Panel de Administración</h2>
           <div id="bloqueLoginAdmin" class="card card-custom p-4 bg-white col-md-6">
             <h5>Acceso Restringido</h5>
-            <div class="mb-3">
-              <label class="form-label">Clave de Administrador</label>
-              <input type="password" id="claveAdmin" class="form-control" placeholder="Ingrese clave">
-            </div>
-            <button onclick="validarAccesoAdmin()" class="btn btn-dark fw-bold">Ingresar</button>
+            <form onsubmit="event.preventDefault(); validarAccesoAdmin();">
+              <div class="mb-3">
+                <label class="form-label">Clave de Administrador</label>
+                <input type="password" id="claveAdmin" class="form-control" placeholder="Ingrese clave">
+              </div>
+              <button type="button" onclick="validarAccesoAdmin()" class="btn btn-dark fw-bold">Ingresar</button>
+            </form>
           </div>
           <div id="bloquePanelAdmin" class="d-none">
             <div class="alert alert-success fw-bold">Modo Administrador Activo (Clave Aceptada)</div>
