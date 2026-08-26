@@ -1,9 +1,9 @@
 <!--
   PROYECTO: SISTEMA DE BIBLIOTECA VIRTUAL VENSALUD
   AUTORA: Iraida Josefina Mijares Ramírez
-  INSTITUCIÓN: VENSALUD, S.A.
+  INSTITUCON: VENSALUD, S.A.
   AÑO: 2026
-  DESCRIPCIÓN: Interfaz principal para la consulta de manuales, registro de usuarios y métricas.
+  DESCRIPCIÓN: Interfaz principal para la consulta de manuales, registro/inicio de sesión de usuarios y métricas.
 -->
 <!DOCTYPE html>
 <html lang="es">
@@ -23,6 +23,8 @@
     .sidebar .nav-link { color: #cfd8dc; cursor: pointer; padding: 12px 20px; }
     .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #0d6efd; color: #fff; }
     .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .nav-pills .nav-link.active { background-color: #0d6efd; color: white; font-weight: bold; }
+    .nav-pills .nav-link { color: #495057; font-weight: 500; }
     @media (max-width: 767.98px) {
       main.col-md-9 { width: 100% !important; padding: 15px !important; }
       h1, .h1 { font-size: 1.5rem !important; }
@@ -57,7 +59,7 @@
         <ul class="nav flex-column mt-3">
           <li class="nav-item">
             <a class="nav-link active" id="nav-registro" onclick="mostrarSeccion('registro')">
-              <i class="fa-solid fa-user-plus me-2"></i>Usuarios / Registro QR
+              <i class="fa-solid fa-user-check me-2"></i>Acceso / Registro QR
             </a>
           </li>
           <li class="nav-item">
@@ -86,48 +88,89 @@
       <!-- Contenido Principal -->
       <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
         
-        <!-- Sección 1: Registro de Usuarios -->
+        <!-- Sección 1: Acceso / Registro de Usuarios -->
         <section id="sec-registro" class="seccion-contenido">
-          <h2 class="mb-4 text-primary fw-bold">Registro de Usuarios y Generación de Credencial</h2>
+          <h2 class="mb-4 text-primary fw-bold">Acceso a Usuarios y Credencial Digital</h2>
           <div class="row">
             <div class="col-md-6 mb-3">
               <div class="card card-custom p-4 bg-white">
-                <h5 class="fw-bold mb-3">Formulario de Registro</h5>
-                <form id="formRegistro" onsubmit="generarCredencial(event)">
-                  <div class="mb-3">
-                    <label class="form-label">Nombre Completo</label>
-                    <input type="text" id="regNombre" class="form-control" required placeholder="Ej: Ana Pérez">
+                
+                <!-- Pestañas para elegir entre Iniciar Sesión o Registrarse -->
+                <ul class="nav nav-pills nav-justified mb-4" id="authTabs" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="login-tab" data-bs-toggle="pill" data-bs-target="#tab-login" type="button" role="tab">
+                      <i class="fa-solid fa-right-to-bracket me-2"></i>Iniciar Sesión
+                    </button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="register-tab" data-bs-toggle="pill" data-bs-target="#tab-registro" type="button" role="tab">
+                      <i class="fa-solid fa-user-plus me-2"></i>Registrarse
+                    </button>
+                  </li>
+                </ul>
+
+                <div class="tab-content" id="authTabsContent">
+                  
+                  <!-- Formulario 1: Iniciar Sesión (Ya registrado) -->
+                  <div class="tab-pane fade show active" id="tab-login" role="tabpanel">
+                    <h5 class="fw-bold mb-3">Consultar Credencial Existente</h5>
+                    <form id="formLogin" onsubmit="iniciarSesion(event)">
+                      <div class="mb-3">
+                        <label class="form-label">Cédula / Identificación</label>
+                        <input type="text" id="loginCedula" class="form-control" required placeholder="Ej: V-12345678">
+                        <div class="form-text">Ingrese la cédula utilizada al momento del registro.</div>
+                      </div>
+                      <button type="submit" class="btn btn-primary w-100 fw-bold">
+                        <i class="fa-solid fa-qrcode me-2"></i>Obtener mi Credencial QR
+                      </button>
+                    </form>
                   </div>
-                  <div class="mb-3">
-                    <label class="form-label">Cédula / Identificación</label>
-                    <input type="text" id="regCedula" class="form-control" required placeholder="Ej: V-12345678">
+
+                  <!-- Formulario 2: Nuevo Registro -->
+                  <div class="tab-pane fade" id="tab-registro" role="tabpanel">
+                    <h5 class="fw-bold mb-3">Formulario de Nuevo Registro</h5>
+                    <form id="formRegistro" onsubmit="generarCredencial(event)">
+                      <div class="mb-3">
+                        <label class="form-label">Nombre Completo</label>
+                        <input type="text" id="regNombre" class="form-control" required placeholder="Ej: Ana Pérez">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Cédula / Identificación</label>
+                        <input type="text" id="regCedula" class="form-control" required placeholder="Ej: V-12345678">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Cargo / Ocupación</label>
+                        <input type="text" id="regCargo" class="form-control" required placeholder="Ej: Técnico Electromédico">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Área / Departamento</label>
+                        <select id="regArea" class="form-select" required>
+                          <option value="">Seleccione un área...</option>
+                          <option value="Electromedicina">Electromedicina</option>
+                          <option value="Mantenimiento">Mantenimiento Hospitalario</option>
+                          <option value="Docencia">Docencia / Investigación</option>
+                          <option value="Administrativo">Administrativo</option>
+                        </select>
+                      </div>
+                      <button type="submit" class="btn btn-success w-100 fw-bold">Registrar Usuario</button>
+                    </form>
                   </div>
-                  <div class="mb-3">
-                    <label class="form-label">Cargo / Ocupación</label>
-                    <input type="text" id="regCargo" class="form-control" required placeholder="Ej: Técnico Electromedico">
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">Área / Departamento</label>
-                    <select id="regArea" class="form-select" required>
-                      <option value="">Seleccione un área...</option>
-                      <option value="Electromedicina">Electromedicina</option>
-                      <option value="Mantenimiento">Mantenimiento Hospitalario</option>
-                      <option value="Docencia">Docencia / Investigación</option>
-                      <option value="Administrativo">Administrativo</option>
-                    </select>
-                  </div>
-                  <button type="submit" class="btn btn-primary w-100 fw-bold">Registrar Usuario</button>
-                </form>
+
+                </div>
+
               </div>
             </div>
+
+            <!-- Card donde se despliega la Credencial -->
             <div class="col-md-6">
               <div id="cardCredencial" class="card card-custom p-4 bg-white text-center d-none">
-                <h5 class="fw-bold text-success mb-2">Credencial Digital Generada</h5>
+                <h5 class="fw-bold text-success mb-2">Credencial Digital</h5>
                 <p class="text-muted small">VENSALUD - Sistema Virtual</p>
                 <div id="qrcode" class="d-flex justify-content-center my-3"></div>
                 <div class="text-start border-top pt-3">
                   <p class="mb-1"><strong>Nombre:</strong> <span id="credNombre"></span></p>
                   <p class="mb-1"><strong>Cédula:</strong> <span id="credCedula"></span></p>
+                  <p class="mb-1"><strong>Cargo:</strong> <span id="credCargo"></span></p>
                   <p class="mb-1"><strong>Área:</strong> <span id="credArea"></span></p>
                   <p class="mb-0"><strong>ID Único:</strong> <span id="credCodigo" class="badge bg-secondary"></span></p>
                 </div>
@@ -253,31 +296,64 @@
       if(id === 'metricas') actualizarMetricas();
     }
 
-    // Registro de Usuario y Código QR
-    function generarCredencial(e) {
-      e.preventDefault();
-      const nombre = document.getElementById('regNombre').value;
-      const cedula = document.getElementById('regCedula').value;
-      const cargo = document.getElementById('regCargo').value;
-      const area = document.getElementById('regArea').value;
-      const codigoUnico = 'VEN-' + Math.floor(1000 + Math.random() * 9000);
-
-      const usuario = { nombre, cedula, cargo, area, codigoUnico };
-      let usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
-      usuarios.push(usuario);
-      localStorage.setItem('vensalud_usuarios', JSON.stringify(usuarios));
-
-      document.getElementById('credNombre').innerText = nombre;
-      document.getElementById('credCedula').innerText = cedula;
-      document.getElementById('credArea').innerText = area;
-      document.getElementById('credCodigo').innerText = codigoUnico;
+    // Mostrar datos de credencial en pantalla
+    function desplegarCredencial(usuario) {
+      document.getElementById('credNombre').innerText = usuario.nombre;
+      document.getElementById('credCedula').innerText = usuario.cedula;
+      document.getElementById('credCargo').innerText = usuario.cargo || 'No especificado';
+      document.getElementById('credArea').innerText = usuario.area;
+      document.getElementById('credCodigo').innerText = usuario.codigoUnico;
 
       const qrContainer = document.getElementById('qrcode');
       qrContainer.innerHTML = "";
-      new QRCode(qrContainer, { text: codigoUnico, width: 120, height: 120 });
+      new QRCode(qrContainer, { text: usuario.codigoUnico, width: 120, height: 120 });
 
       document.getElementById('cardCredencial').classList.remove('d-none');
+    }
+
+    // Iniciar Sesión (Para usuarios registrados previamente)
+    function iniciarSesion(e) {
+      e.preventDefault();
+      const cedulaIngresada = document.getElementById('loginCedula').value.trim();
+      const usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
+
+      // Buscar coincidencia por Cédula
+      const usuarioEncontrado = usuarios.find(u => u.cedula.toLowerCase() === cedulaIngresada.toLowerCase());
+
+      if (usuarioEncontrado) {
+        desplegarCredencial(usuarioEncontrado);
+        document.getElementById('formLogin').reset();
+      } else {
+        alert("Cédula no encontrada. Por favor verifique los datos o seleccione la pestaña 'Registrarse'.");
+      }
+    }
+
+    // Registro de Nuevo Usuario y Generación de Código QR
+    function generarCredencial(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('regNombre').value.trim();
+      const cedula = document.getElementById('regCedula').value.trim();
+      const cargo = document.getElementById('regCargo').value.trim();
+      const area = document.getElementById('regArea').value;
+
+      let usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
+
+      // Verificar si la cédula ya existe
+      const yaExiste = usuarios.some(u => u.cedula.toLowerCase() === cedula.toLowerCase());
+      if (yaExiste) {
+        alert("Esta cédula ya se encuentra registrada. Puede consultar su credencial desde la pestaña 'Iniciar Sesión'.");
+        return;
+      }
+
+      const codigoUnico = 'VEN-' + Math.floor(1000 + Math.random() * 9000);
+      const nuevoUsuario = { nombre, cedula, cargo, area, codigoUnico };
+
+      usuarios.push(nuevoUsuario);
+      localStorage.setItem('vensalud_usuarios', JSON.stringify(usuarios));
+
+      desplegarCredencial(nuevoUsuario);
       document.getElementById('formRegistro').reset();
+      alert("¡Usuario registrado exitosamente!");
     }
 
     // Guardar Documento
