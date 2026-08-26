@@ -10,569 +10,375 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Biblioteca Virtual - VENSALUD</title>
+  <title>Sistema de Biblioteca Virtual VENSALUD</title>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- QRCode.js Library -->
+  <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
-    body { background-color: #f4f6f9; }
-    .sidebar { min-height: 100vh; background-color: #1e293b; color: #fff; }
-    .sidebar .nav-link { color: #cbd5e1; padding: 12px 20px; font-weight: 500; cursor: pointer; }
-    .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #0f172a; color: #fff; }
-    .card-custom { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .qr-card { border: 2px dashed #0d6efd; background-color: #f8fafc; border-radius: 12px; }
-    .pdf-viewer-container { width: 100%; height: 75vh; border: none; }
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .sidebar { background-color: #212529; min-height: 100vh; }
+    .sidebar .nav-link { color: #cfd8dc; cursor: pointer; padding: 12px 20px; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #0d6efd; color: #fff; }
+    .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    @media (max-width: 767.98px) {
+      main.col-md-9 { width: 100% !important; padding: 15px !important; }
+      h1, .h1 { font-size: 1.5rem !important; }
+    }
   </style>
 </head>
 <body>
 
-<div class="container-fluid">
-  <div class="row">
-    <!-- Navegación Lateral -->
-    <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
-      <div class="p-3 fs-5 fw-bold border-bottom border-secondary text-white text-center">
-        <i class="fa-solid fa-book-bookmark me-2"></i>Biblioteca Virtual
+  <!-- Navegación Superior para Móviles -->
+  <nav class="navbar navbar-dark bg-dark d-md-none p-3 shadow-sm">
+    <div class="container-fluid">
+      <div>
+        <span class="navbar-brand fw-bold mb-0 h1 d-block">
+          <i class="fa-solid fa-book-bookmark me-2"></i>Biblioteca Virtual
+        </span>
+        <small class="text-muted" style="font-size: 0.75rem;">Desarrollado por Iraida Mijares</small>
       </div>
-      <ul class="nav flex-column mt-3">
-        <li class="nav-item">
-          <a class="nav-link active" id="nav-registro" onclick="mostrarSeccion('registro')">
-            <i class="fa-solid fa-user-plus me-2"></i>Usuarios / Registro QR
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="nav-cargar" onclick="mostrarSeccion('cargar')">
-            <i class="fa-solid fa-file-arrow-up me-2"></i>Cargar Documentos
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="nav-documentos" onclick="mostrarSeccion('documentos')">
-            <i class="fa-solid fa-book me-2"></i>Documentos Cargados
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="nav-metricas" onclick="mostrarSeccion('metricas')">
-            <i class="fa-solid fa-chart-line me-2"></i>Panel de Métricas
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="nav-admin" onclick="mostrarSeccion('admin')">
-            <i class="fa-solid fa-gear me-2"></i>Administrador
-          </a>
-        </li>
-      </ul>
-    </nav>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </nav>
 
-    <!-- Contenido Principal -->
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-      
-      <!-- SECCIÓN 1: REGISTRO Y QR -->
-      <div id="seccion-registro" class="seccion-contenido">
-        <h2 class="fw-bold mb-4">Registro de Usuarios y Generación de Credencial</h2>
-        <div class="row">
-          <div class="col-md-6 mb-4">
-            <div class="card card-custom p-4">
-              <h5 class="fw-bold mb-3">Formulario de Registro</h5>
-              <form id="formUsuario" onsubmit="generarCarnetQR(event)">
-                <div class="mb-3">
-                  <label class="form-label text-muted">Nombre Completo</label>
-                  <input type="text" id="nombreUsuario" class="form-control" placeholder="Ej: Ana Pérez" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label text-muted">Cédula / Identificación</label>
-                  <input type="text" id="cedulaUsuario" class="form-control" placeholder="Ej: V-12345678" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label text-muted">Cargo / Ocupación</label>
-                  <input type="text" id="cargoUsuario" class="form-control" placeholder="Ej: Técnico Electromedico / Estudiante" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label text-muted">Área / Departamento</label>
-                  <select id="areaUsuario" class="form-select" required>
-                    <option value="" disabled selected>Seleccione un área...</option>
-                    <option value="Mantenimiento y Equipos">Mantenimiento y Equipos</option>
-                    <option value="Docencia e Investigación">Docencia e Investigación</option>
-                    <option value="Administración / RRHH">Administración / RRHH</option>
-                    <option value="Estudiantes / PNF">Estudiantes / PNF</option>
-                    <option value="Visitante / General">Visitante / General</option>
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Registrar Usuario</button>
-              </form>
-            </div>
-          </div>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Menú Lateral Responsivo -->
+      <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
+        <div class="p-3 border-bottom border-secondary text-white text-center d-none d-md-block">
+          <div class="fs-5 fw-bold"><i class="fa-solid fa-book-bookmark me-2"></i>Biblioteca Virtual</div>
+          <small class="text-muted d-block mt-1" style="font-size: 0.8rem;">Desarrollado por Iraida Mijares</small>
+        </div>
+        <ul class="nav flex-column mt-3">
+          <li class="nav-item">
+            <a class="nav-link active" id="nav-registro" onclick="mostrarSeccion('registro')">
+              <i class="fa-solid fa-user-plus me-2"></i>Usuarios / Registro QR
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="nav-cargar" onclick="mostrarSeccion('cargar')">
+              <i class="fa-solid fa-file-arrow-up me-2"></i>Cargar Documentos
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="nav-documentos" onclick="mostrarSeccion('documentos')">
+              <i class="fa-solid fa-book me-2"></i>Documentos Cargados
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="nav-metricas" onclick="mostrarSeccion('metricas')">
+              <i class="fa-solid fa-chart-line me-2"></i>Panel de Métricas
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="nav-admin" onclick="mostrarSeccion('admin')">
+              <i class="fa-solid fa-gear me-2"></i>Administrador
+            </a>
+          </li>
+        </ul>
+      </nav>
 
-          <div class="col-md-6 mb-4">
-            <div id="resultadoQR" class="card card-custom p-4 text-center d-none">
-              <h5 class="fw-bold mb-3 text-start">Credencial Digital de Acceso</h5>
-              <div class="qr-card p-3 mb-3">
-                <div id="qrcode" class="d-flex justify-content-center my-3"></div>
-                <h5 class="fw-bold mb-1" id="resNombre"></h5>
-                <p class="text-muted mb-1" id="resCedula"></p>
-                <p class="badge bg-primary mb-3" id="resArea"></p>
-                
-                <div class="alert alert-warning border-warning mb-0 text-start">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <small class="text-muted d-block fw-bold">CLAVE DE ACCESO DIRECTO:</small>
-                      <span id="resClave" class="fw-bold fs-4 text-dark font-monospace"></span>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="copiarClave()">
-                      <i class="fa-regular fa-copy me-1"></i> Copiar
-                    </button>
+      <!-- Contenido Principal -->
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+        
+        <!-- Sección 1: Registro de Usuarios -->
+        <section id="sec-registro" class="seccion-contenido">
+          <h2 class="mb-4 text-primary fw-bold">Registro de Usuarios y Generación de Credencial</h2>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <div class="card card-custom p-4 bg-white">
+                <h5 class="fw-bold mb-3">Formulario de Registro</h5>
+                <form id="formRegistro" onsubmit="generarCredencial(event)">
+                  <div class="mb-3">
+                    <label class="form-label">Nombre Completo</label>
+                    <input type="text" id="regNombre" class="form-control" required placeholder="Ej: Ana Pérez">
                   </div>
-                  <small class="text-muted mt-2 d-block fs-7">
-                    <i class="fa-solid fa-circle-info me-1"></i> Utilice esta clave junto con su número de Cédula para ingresar al portal.
-                  </small>
+                  <div class="mb-3">
+                    <label class="form-label">Cédula / Identificación</label>
+                    <input type="text" id="regCedula" class="form-control" required placeholder="Ej: V-12345678">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Cargo / Ocupación</label>
+                    <input type="text" id="regCargo" class="form-control" required placeholder="Ej: Técnico Electromedico">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Área / Departamento</label>
+                    <select id="regArea" class="form-select" required>
+                      <option value="">Seleccione un área...</option>
+                      <option value="Electromedicina">Electromedicina</option>
+                      <option value="Mantenimiento">Mantenimiento Hospitalario</option>
+                      <option value="Docencia">Docencia / Investigación</option>
+                      <option value="Administrativo">Administrativo</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary w-100 fw-bold">Registrar Usuario</button>
+                </form>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div id="cardCredencial" class="card card-custom p-4 bg-white text-center d-none">
+                <h5 class="fw-bold text-success mb-2">Credencial Digital Generada</h5>
+                <p class="text-muted small">VENSALUD - Sistema Virtual</p>
+                <div id="qrcode" class="d-flex justify-content-center my-3"></div>
+                <div class="text-start border-top pt-3">
+                  <p class="mb-1"><strong>Nombre:</strong> <span id="credNombre"></span></p>
+                  <p class="mb-1"><strong>Cédula:</strong> <span id="credCedula"></span></p>
+                  <p class="mb-1"><strong>Área:</strong> <span id="credArea"></span></p>
+                  <p class="mb-0"><strong>ID Único:</strong> <span id="credCodigo" class="badge bg-secondary"></span></p>
                 </div>
               </div>
-              <button onclick="window.print()" class="btn btn-outline-secondary w-100">
-                <i class="fa-solid fa-print me-1"></i> Imprimir Credencial
-              </button>
-            </div>
-            
-            <div id="placeholderQR" class="card card-custom p-5 text-center text-muted">
-              <i class="fa-solid fa-id-card fa-4x mb-3"></i>
-              <h6>Complete el formulario para generar la credencial de acceso directo.</h6>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <!-- SECCIÓN 2: CARGAR DOCUMENTOS -->
-      <div id="seccion-cargar" class="seccion-contenido d-none">
-        <h2 class="fw-bold mb-4">Cargar Documento Digital</h2>
-        <div class="card card-custom p-4 col-md-8 mx-auto">
-          <form id="formCargarDoc" onsubmit="guardarDocumento(event)">
-            <div class="mb-3">
-              <label class="form-label text-muted">Título del Documento / Manual</label>
-              <input type="text" id="docTitulo" class="form-control" placeholder="Ej: Manual Quirúrgico" required>
-            </div>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label text-muted">Categoría / Área</label>
+        <!-- Sección 2: Cargar Documentos -->
+        <section id="sec-cargar" class="seccion-contenido d-none">
+          <h2 class="mb-4 text-primary fw-bold">Cargar Documento Técnico</h2>
+          <div class="card card-custom p-4 bg-white col-md-8">
+            <form id="formCargar" onsubmit="guardarDocumento(event)">
+              <div class="mb-3">
+                <label class="form-label">Título del Documento</label>
+                <input type="text" id="docTitulo" class="form-control" required placeholder="Ej: Manual de Servicio Incubadora">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Categoría</label>
                 <select id="docCategoria" class="form-select" required>
-                  <option value="" disabled selected>Seleccione categoría...</option>
-                  <option value="Equipamiento Médico">Equipamiento Médico</option>
-                  <option value="Normativa y Seguridad">Normativa y Seguridad</option>
-                  <option value="Guía Docente / PNF">Guía Docente / PNF</option>
-                  <option value="Investigación">Investigación</option>
+                  <option value="Manuales Técnicos">Manuales Técnicos</option>
+                  <option value="Guías Rápida">Guías Rápidas</option>
+                  <option value="Normativas">Normativas / ISO / COVENIN</option>
+                  <option value="Investigación">Investigación / Guías PNF</option>
                 </select>
               </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label text-muted">Archivo (PDF, EPUB, DOCX)</label>
-                <input type="file" id="docArchivo" class="form-control" accept=".pdf,.epub,.docx" required>
+              <div class="mb-3">
+                <label class="form-label">Seleccionar Archivo (PDF / Imagen / Texto)</label>
+                <input type="file" id="docArchivo" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" required>
+              </div>
+              <button type="submit" class="btn btn-success fw-bold">Guardar en Biblioteca</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Sección 3: Documentos Cargados -->
+        <section id="sec-documentos" class="seccion-contenido d-none">
+          <h2 class="mb-4 text-primary fw-bold">Catálogo de Documentos</h2>
+          <div class="row" id="contenedorDocumentos"></div>
+        </section>
+
+        <!-- Sección 4: Métricas -->
+        <section id="sec-metricas" class="seccion-contenido d-none">
+          <h2 class="mb-4 text-primary fw-bold">Panel de Métricas e Indicadores</h2>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <div class="card card-custom p-3 bg-white border-start border-primary border-4">
+                <h6 class="text-muted">Total Usuarios Registrados</h6>
+                <h3 id="mTotalUsuarios" class="fw-bold">0</h3>
               </div>
             </div>
+            <div class="col-md-4 mb-3">
+              <div class="card card-custom p-3 bg-white border-start border-success border-4">
+                <h6 class="text-muted">Total Documentos</h6>
+                <h3 id="mTotalDocumentos" class="fw-bold">0</h3>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card card-custom p-3 bg-white border-start border-warning border-4">
+                <h6 class="text-muted">Consultas Realizadas</h6>
+                <h3 id="mTotalConsultas" class="fw-bold">0</h3>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sección 5: Administrador -->
+        <section id="sec-admin" class="seccion-contenido d-none">
+          <h2 class="mb-4 text-primary fw-bold">Panel de Administración</h2>
+          <div id="bloqueLoginAdmin" class="card card-custom p-4 bg-white col-md-6">
+            <h5>Acceso Restringido</h5>
             <div class="mb-3">
-              <label class="form-label text-muted">Descripción Breve</label>
-              <textarea id="docDescripcion" class="form-control" rows="2" placeholder="Resumen corto del contenido..." required></textarea>
+              <label class="form-label">Clave de Administrador</label>
+              <input type="password" id="claveAdmin" class="form-control" placeholder="Ingrese clave">
             </div>
-            <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
-              <i class="fa-solid fa-cloud-arrow-up me-2"></i> Subir a la Biblioteca
-            </button>
-          </form>
-        </div>
-      </div>
+            <button onclick="validarAccesoAdmin()" class="btn btn-dark fw-bold">Ingresar</button>
+          </div>
+          <div id="bloquePanelAdmin" class="d-none">
+            <div class="alert alert-success fw-bold">Modo Administrador Activo (Clave Aceptada)</div>
+            <button onclick="limpiarBaseDatos()" class="btn btn-danger fw-bold">Reiniciar Base de Datos Local</button>
+          </div>
+        </section>
 
-      <!-- SECCIÓN 3: DOCUMENTOS CARGADOS -->
-      <div id="seccion-documentos" class="seccion-contenido d-none">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="fw-bold m-0">Catálogo de Documentos</h2>
-          <div class="w-50">
-            <input type="text" id="inputBuscar" class="form-control" onkeyup="buscarDocumentos()" placeholder="Buscar por título o categoría...">
-          </div>
-        </div>
-        <div class="row" id="contenedorDocumentos">
-          <!-- Se llena dinámicamente -->
-        </div>
-      </div>
-
-      <!-- SECCIÓN 4: PANEL DE MÉTRICAS -->
-      <div id="seccion-metricas" class="seccion-contenido d-none">
-        <h2 class="fw-bold mb-4">Panel de Métricas y Estadísticas</h2>
-        <div class="row mb-4">
-          <div class="col-md-3">
-            <div class="card card-custom p-3 text-center border-start border-primary border-4">
-              <span class="text-muted small fw-bold">TOTAL USUARIOS</span>
-              <h3 class="fw-bold my-2 text-primary" id="metricaUsuarios">0</h3>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card card-custom p-3 text-center border-start border-success border-4">
-              <span class="text-muted small fw-bold">DOCUMENTOS</span>
-              <h3 class="fw-bold my-2 text-success" id="metricaDocumentos">0</h3>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card card-custom p-3 text-center border-start border-warning border-4">
-              <span class="text-muted small fw-bold">CONSULTAS HOY</span>
-              <h3 class="fw-bold my-2 text-warning" id="metricaConsultas">0</h3>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card card-custom p-3 text-center border-start border-info border-4">
-              <span class="text-muted small fw-bold">ACCESOS POR QR</span>
-              <h3 class="fw-bold my-2 text-info" id="metricaQR">0%</h3>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN 5: ADMINISTRADOR -->
-      <div id="seccion-admin" class="seccion-contenido d-none">
-        <h2 class="fw-bold mb-4">Panel de Administración</h2>
-        <div class="card card-custom p-4 mb-4">
-          <h5 class="fw-bold mb-3"><i class="fa-solid fa-sliders me-2"></i>Ajustes y Acciones del Sistema</h5>
-          <p class="text-muted">Módulo de control de permisos, gestión de base de datos local y parámetros del servidor.</p>
-          <hr class="my-4">
-
-          <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-users-gear me-2"></i>Gestión de Usuarios y Registros</h6>
-          <div class="row g-3 mb-4">
-            <div class="col-md-4">
-              <button class="btn btn-outline-warning w-100 p-3 text-start" onclick="desactivarUsuarioAdmin()">
-                <i class="fa-solid fa-user-slash fa-lg me-2"></i>
-                <div>
-                  <strong>Desactivar Usuario</strong>
-                  <div class="small text-muted">Suspender credenciales</div>
-                </div>
-              </button>
-            </div>
-            <div class="col-md-4">
-              <button class="btn btn-outline-danger w-100 p-3 text-start" onclick="eliminarUsuarioAdmin()">
-                <i class="fa-solid fa-user-xmark fa-lg me-2"></i>
-                <div>
-                  <strong>Eliminar Usuario</strong>
-                  <div class="small text-muted">Borrar usuario del sistema</div>
-                </div>
-              </button>
-            </div>
-            <div class="col-md-4">
-              <button class="btn btn-outline-dark w-100 p-3 text-start" onclick="eliminarRegistroAdmin()">
-                <i class="fa-solid fa-id-card-clip fa-lg me-2"></i>
-                <div>
-                  <strong>Eliminar Registro</strong>
-                  <div class="small text-muted">Limpiar vista de carnet QR</div>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-database me-2"></i>Mantenimiento de Archivos</h6>
-          <div class="row g-3">
-            <div class="col-md-6">
-              <button class="btn btn-danger w-100 p-3 text-start" onclick="eliminarDocumentosAdmin()">
-                <i class="fa-solid fa-trash-can fa-lg me-2"></i>
-                <div>
-                  <strong>Eliminar Todos los Documentos</strong>
-                  <div class="small text-white-50">Vaciar catálogo en localStorage</div>
-                </div>
-              </button>
-            </div>
-            <div class="col-md-6">
-              <button class="btn btn-secondary w-100 p-3 text-start" onclick="reiniciarSistemaAdmin()">
-                <i class="fa-solid fa-rotate-right fa-lg me-2"></i>
-                <div>
-                  <strong>Restablecer Sistema</strong>
-                  <div class="small text-white-50">Restaurar métricas y base local</div>
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MODAL DE ACCESO ADMINISTRADOR -->
-      <div class="modal fade" id="modalAuthAdmin" data-bs-backdrop="static" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Acceso Restringido</h5>
-            </div>
-            <div class="modal-body">
-              <label class="form-label">Ingrese clave de administrador:</label>
-              <input type="password" id="claveAdminInput" class="form-control" placeholder="****">
-              <div id="errorClave" class="text-danger small mt-2 d-none">Clave incorrecta. Intente de nuevo.</div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="button" class="btn btn-primary" onclick="validarAccesoAdmin()">Ingresar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </main>
+      </main>
+    </div>
   </div>
-</div>
 
-<!-- MODAL VISOR DE DOCUMENTOS -->
-<div class="modal fade" id="modalVisor" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="modalVisorLabel">Previsualización de Documento</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-0">
-        <iframe id="visorIframe" class="pdf-viewer-container" src=""></iframe>
+  <!-- Modal Visor de Documentos -->
+  <div class="modal fade" id="modalVisor" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="visorTitulo">Visor de Documento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0" style="height: 80vh;">
+          <iframe id="iframeVisor" src="" style="width:100%; height:100%; border:none;"></iframe>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Bootstrap 5 JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-  let contadorUsuarios = parseInt(localStorage.getItem('biblioteca_usuarios_cnt')) || 0;
-  let contadorConsultas = parseInt(localStorage.getItem('biblioteca_consultas_cnt')) || 0;
-  let listaDocumentos = JSON.parse(localStorage.getItem('biblioteca_docs')) || [];
+  <script>
+    // Navegación entre Secciones
+    function mostrarSeccion(id) {
+      document.querySelectorAll('.seccion-contenido').forEach(el => el.classList.add('d-none'));
+      document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('sec-' + id).classList.remove('d-none');
+      document.getElementById('nav-' + id).classList.add('active');
 
-  document.addEventListener("DOMContentLoaded", () => {
-    renderizarDocumentos();
-    actualizarMetricas();
-  });
+      // Cerrar menú responsive automáticamente en móviles
+      const sidebarMenu = document.getElementById('sidebarMenu');
+      if (sidebarMenu.classList.contains('show')) {
+        const bsCollapse = new bootstrap.Collapse(sidebarMenu);
+        bsCollapse.hide();
+      }
 
-  function actualizarMetricas() {
-    const elUser = document.getElementById('metricaUsuarios');
-    const elDoc = document.getElementById('metricaDocumentos');
-    const elConsultas = document.getElementById('metricaConsultas');
-    
-    if (elUser) elUser.innerText = contadorUsuarios;
-    if (elDoc) elDoc.innerText = listaDocumentos.length;
-    if (elConsultas) elConsultas.innerText = contadorConsultas;
-  }
-
-  function renderizarDocumentos() {
-    const contenedor = document.getElementById('contenedorDocumentos');
-    contenedor.innerHTML = '';
-
-    if (listaDocumentos.length === 0) {
-      contenedor.innerHTML = `
-        <div class="col-12 text-center text-muted py-5">
-          <i class="fa-solid fa-folder-open fa-3x mb-3"></i>
-          <h6>No hay documentos subidos en la biblioteca.</h6>
-        </div>`;
-      actualizarMetricas();
-      return;
+      if(id === 'documentos') cargarCatalogoDocumentos();
+      if(id === 'metricas') actualizarMetricas();
     }
 
-    listaDocumentos.forEach((doc, index) => {
-      const nuevaCard = document.createElement('div');
-      nuevaCard.className = 'col-md-4 mb-3 doc-item';
-      nuevaCard.innerHTML = `
-        <div class="card card-custom p-3 h-100">
-          <div class="d-flex align-items-center mb-3">
-            <i class="fa-solid fa-file-pdf fa-2x text-danger me-3"></i>
-            <div>
-              <h6 class="fw-bold mb-0 doc-titulo">${doc.titulo}</h6>
-              <small class="text-muted doc-cat">${doc.categoria}</small>
+    // Registro de Usuario y Código QR
+    function generarCredencial(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('regNombre').value;
+      const cedula = document.getElementById('regCedula').value;
+      const cargo = document.getElementById('regCargo').value;
+      const area = document.getElementById('regArea').value;
+      const codigoUnico = 'VEN-' + Math.floor(1000 + Math.random() * 9000);
+
+      const usuario = { nombre, cedula, cargo, area, codigoUnico };
+      let usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
+      usuarios.push(usuario);
+      localStorage.setItem('vensalud_usuarios', JSON.stringify(usuarios));
+
+      document.getElementById('credNombre').innerText = nombre;
+      document.getElementById('credCedula').innerText = cedula;
+      document.getElementById('credArea').innerText = area;
+      document.getElementById('credCodigo').innerText = codigoUnico;
+
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = "";
+      new QRCode(qrContainer, { text: codigoUnico, width: 120, height: 120 });
+
+      document.getElementById('cardCredencial').classList.remove('d-none');
+      document.getElementById('formRegistro').reset();
+    }
+
+    // Guardar Documento
+    function guardarDocumento(e) {
+      e.preventDefault();
+      const titulo = document.getElementById('docTitulo').value;
+      const categoria = document.getElementById('docCategoria').value;
+      const fileInput = document.getElementById('docArchivo');
+      const file = fileInput.files[0];
+
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const docData = { titulo, categoria, dataUrl: evt.target.result, fecha: new Date().toLocaleDateString() };
+          let docs = JSON.parse(localStorage.getItem('vensalud_docs') || '[]');
+          docs.push(docData);
+          localStorage.setItem('vensalud_docs', JSON.stringify(docs));
+          alert("¡Documento guardado con éxito!");
+          document.getElementById('formCargar').reset();
+        } catch(err) {
+          alert("El archivo es demasiado grande para el almacenamiento local. Intente con un archivo PDF o imagen de menor tamaño.");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Cargar Catálogo
+    function cargarCatalogoDocumentos() {
+      const contenedor = document.getElementById('contenedorDocumentos');
+      const docs = JSON.parse(localStorage.getItem('vensalud_docs') || '[]');
+      contenedor.innerHTML = "";
+
+      if(docs.length === 0) {
+        contenedor.innerHTML = `<div class="col-12"><div class="alert alert-info">No hay documentos registrados aún.</div></div>`;
+        return;
+      }
+
+      docs.forEach((doc, idx) => {
+        contenedor.innerHTML += `
+          <div class="col-md-4 mb-3">
+            <div class="card card-custom p-3 bg-white h-100 d-flex flex-column justify-content-between">
+              <div>
+                <span class="badge bg-primary mb-2">${doc.categoria}</span>
+                <h5 class="fw-bold">${doc.titulo}</h5>
+                <small class="text-muted">Fecha: ${doc.fecha}</small>
+              </div>
+              <button onclick="verDocumento(${idx})" class="btn btn-outline-primary btn-sm mt-3 fw-bold">
+                <i class="fa-solid fa-eye me-1"></i>Visualizar
+              </button>
             </div>
           </div>
-          <p class="small text-muted">${doc.descripcion}</p>
-          <button class="btn btn-sm btn-outline-primary mt-auto" onclick="abrirVisor(${index})">
-            <i class="fa-solid fa-eye me-1"></i> Visualizar Documento
-          </button>
-        </div>
-      `;
-      contenedor.appendChild(nuevaCard);
-    });
-
-    actualizarMetricas();
-  }
-
-  function guardarDocumento(event) {
-    event.preventDefault();
-
-    const titulo = document.getElementById('docTitulo').value;
-    const categoria = document.getElementById('docCategoria').value;
-    const descripcion = document.getElementById('docDescripcion').value;
-    const archivoInput = document.getElementById('docArchivo');
-    const archivo = archivoInput.files[0];
-
-    if (!archivo) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const base64Url = e.target.result;
-
-      try {
-        listaDocumentos.push({ titulo, categoria, descripcion, url: base64Url });
-        localStorage.setItem('biblioteca_docs', JSON.stringify(listaDocumentos));
-        renderizarDocumentos();
-        document.getElementById('formCargarDoc').reset();
-        alert('¡Documento registrado y subido con éxito!');
-        mostrarSeccion('documentos');
-      } catch (err) {
-        alert('El archivo es demasiado grande para ser almacenado en la memoria local del navegador.');
-      }
-    };
-
-    reader.readAsDataURL(archivo);
-  }
-
-  function abrirVisor(index) {
-    const doc = listaDocumentos[index];
-    if (doc && doc.url) {
-      contadorConsultas++;
-      localStorage.setItem('biblioteca_consultas_cnt', contadorConsultas);
-      actualizarMetricas();
-
-      document.getElementById('modalVisorLabel').innerText = `Visualizando: ${doc.titulo}`;
-      document.getElementById('visorIframe').src = doc.url;
-      const modal = new bootstrap.Modal(document.getElementById('modalVisor'));
-      modal.show();
-    } else {
-      alert('Error al intentar cargar la vista previa del documento.');
+        `;
+      });
     }
-  }
 
-  function buscarDocumentos() {
-    const filtro = document.getElementById('inputBuscar').value.toLowerCase().trim();
-    document.querySelectorAll('.doc-item').forEach(item => {
-      const titulo = item.querySelector('.doc-titulo').innerText.toLowerCase();
-      const categoria = item.querySelector('.doc-cat').innerText.toLowerCase();
-      if (titulo.includes(filtro) || categoria.includes(filtro)) {
-        item.classList.remove('d-none');
+    // Ver Documento en Modal
+    function verDocumento(index) {
+      const docs = JSON.parse(localStorage.getItem('vensalud_docs') || '[]');
+      const doc = docs[index];
+      if(doc) {
+        document.getElementById('visorTitulo').innerText = doc.titulo;
+        document.getElementById('iframeVisor').src = doc.dataUrl;
+        let consultas = parseInt(localStorage.getItem('vensalud_consultas') || '0');
+        localStorage.setItem('vensalud_consultas', consultas + 1);
+        const myModal = new bootstrap.Modal(document.getElementById('modalVisor'));
+        myModal.show();
+      }
+    }
+
+    // Actualizar Métricas
+    function actualizarMetricas() {
+      const usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
+      const docs = JSON.parse(localStorage.getItem('vensalud_docs') || '[]');
+      const consultas = localStorage.getItem('vensalud_consultas') || '0';
+
+      document.getElementById('mTotalUsuarios').innerText = usuarios.length;
+      document.getElementById('mTotalDocumentos').innerText = docs.length;
+      document.getElementById('mTotalConsultas').innerText = consultas;
+    }
+
+    // Validar Admin
+    function validarAccesoAdmin() {
+      const clave = document.getElementById('claveAdmin').value;
+      if(clave === '1234') {
+        document.getElementById('bloqueLoginAdmin').classList.add('d-none');
+        document.getElementById('bloquePanelAdmin').classList.remove('d-none');
       } else {
-        item.classList.add('d-none');
+        alert("Clave incorrecta. La clave por defecto es 1234.");
       }
-    });
-  }
-
-  function generarCarnetQR(event) {
-    event.preventDefault();
-    const nombre = document.getElementById('nombreUsuario').value;
-    const cedula = document.getElementById('cedulaUsuario').value;
-    const cargo = document.getElementById('cargoUsuario').value;
-    const area = document.getElementById('areaUsuario').value;
-    const claveAcceso = 'BV-' + Math.floor(1000 + Math.random() * 9000);
-
-    const qrContainer = document.getElementById('qrcode');
-    qrContainer.innerHTML = '';
-
-    new QRCode(qrContainer, {
-      text: JSON.stringify({ nombre, cedula, clave: claveAcceso, area }),
-      width: 150,
-      height: 150,
-      colorDark: "#0f172a",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
-    });
-
-    document.getElementById('resNombre').innerText = nombre;
-    document.getElementById('resCedula').innerText = `ID: ${cedula} | ${cargo}`;
-    document.getElementById('resArea').innerText = area;
-    document.getElementById('resClave').innerText = claveAcceso;
-
-    document.getElementById('placeholderQR').classList.add('d-none');
-    document.getElementById('resultadoQR').classList.remove('d-none');
-
-    contadorUsuarios++;
-    localStorage.setItem('biblioteca_usuarios_cnt', contadorUsuarios);
-    actualizarMetricas();
-  }
-
-  function copiarClave() {
-    const clave = document.getElementById('resClave').innerText;
-    navigator.clipboard.writeText(clave).then(() => {
-      alert('¡Clave de acceso copiada al portapapeles!');
-    });
-  }
-
-  // --- ADMINISTRACIÓN Y NAVEGACIÓN ---
-
-  function solicitarClaveAdmin() {
-    let modalAdmin = new bootstrap.Modal(document.getElementById('modalAuthAdmin'));
-    modalAdmin.show();
-  }
-
-  function validarAccesoAdmin() {
-    const claveInput = document.getElementById('claveAdminInput').value;
-
-    // Validación local por defecto (clave: 1234) o conectar con API mediante fetch
-    if (claveInput === "1234") {
-      let modalEl = document.getElementById('modalAuthAdmin');
-      let modal = bootstrap.Modal.getInstance(modalEl);
-      modal.hide();
-
-      cambiarVista('admin');
-      document.getElementById('errorClave').classList.add('d-none');
-      document.getElementById('claveAdminInput').value = '';
-    } else {
-      document.getElementById('errorClave').classList.remove('d-none');
     }
-  }
 
-  function mostrarSeccion(nombreSeccion) {
-    if (nombreSeccion === 'admin') {
-      solicitarClaveAdmin();
-    } else {
-      cambiarVista(nombreSeccion);
+    // Limpiar Base de Datos
+    function limpiarBaseDatos() {
+      if(confirm("¿Está segura de que desea borrar todos los registros y documentos locales?")) {
+        localStorage.clear();
+        alert("Base de datos reiniciada.");
+        location.reload();
+      }
     }
-  }
-
-  function cambiarVista(nombreSeccion) {
-    document.querySelectorAll('.seccion-contenido').forEach(sec => sec.classList.add('d-none'));
-    document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
-
-    const seccionActiva = document.getElementById(`seccion-${nombreSeccion}`);
-    const linkActivo = document.getElementById(`nav-${nombreSeccion}`);
-
-    if (seccionActiva) seccionActiva.classList.remove('d-none');
-    if (linkActivo) linkActivo.classList.add('active');
-  }
-
-  // --- ACCIONES DEL PANEL ADMINISTRATIVO ---
-
-  function desactivarUsuarioAdmin() {
-    const cedula = prompt("Ingrese la Cédula/ID del usuario a desactivar:");
-    if (cedula) {
-      alert(`El usuario con ID ${cedula} ha sido desactivado temporalmente.`);
-    }
-  }
-
-  function eliminarUsuarioAdmin() {
-    const cedula = prompt("Ingrese la Cédula/ID del usuario a eliminar:");
-    if (cedula) {
-      if (contadorUsuarios > 0) contadorUsuarios--;
-      localStorage.setItem('biblioteca_usuarios_cnt', contadorUsuarios);
-      actualizarMetricas();
-      alert(`El usuario con ID ${cedula} ha sido eliminado del sistema.`);
-    }
-  }
-
-  function eliminarRegistroAdmin() {
-    if (confirm("¿Desea limpiar la vista de la última credencial QR?")) {
-      document.getElementById('resultadoQR').classList.add('d-none');
-      document.getElementById('placeholderQR').classList.remove('d-none');
-      alert("Registro limpiado exitosamente.");
-    }
-  }
-
-  function eliminarDocumentosAdmin() {
-    if (confirm("¡ATENCIÓN! Esta acción eliminará TODOS los documentos almacenados. ¿Desea continuar?")) {
-      listaDocumentos = [];
-      localStorage.removeItem('biblioteca_docs');
-      renderizarDocumentos();
-      alert("Todos los documentos han sido eliminados.");
-    }
-  }
-
-  function reiniciarSistemaAdmin() {
-    if (confirm("¿Desea restablecer todos los parámetros y métricas locales por defecto?")) {
-      localStorage.clear();
-      listaDocumentos = [];
-      contadorUsuarios = 0;
-      contadorConsultas = 0;
-      renderizarDocumentos();
-      actualizarMetricas();
-      alert("El sistema se ha restablecido correctamente.");
-    }
-  }
-</script>
+  </script>
 </body>
 </html>
