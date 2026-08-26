@@ -111,16 +111,16 @@
 
                 <div class="tab-content" id="authTabsContent">
                   
-                  <!-- Formulario 1: Iniciar Sesión (Ya registrado) -->
+                  <!-- Formulario 1: Iniciar Sesión -->
                   <div class="tab-pane fade show active" id="tab-login" role="tabpanel">
                     <h5 class="fw-bold mb-3">Consultar Credencial Existente</h5>
-                    <form id="formLogin" onsubmit="iniciarSesion(event)">
+                    <form id="formLogin">
                       <div class="mb-3">
                         <label class="form-label">Cédula / Identificación</label>
-                        <input type="text" id="loginCedula" class="form-control" required placeholder="Ej: V-12345678">
+                        <input type="text" id="loginCedula" class="form-control" placeholder="Ej: V-12345678">
                         <div class="form-text">Ingrese la cédula utilizada al momento del registro.</div>
                       </div>
-                      <button type="submit" class="btn btn-primary w-100 fw-bold">
+                      <button type="button" onclick="iniciarSesion()" class="btn btn-primary w-100 fw-bold">
                         <i class="fa-solid fa-qrcode me-2"></i>Obtener mi Credencial QR
                       </button>
                     </form>
@@ -129,22 +129,22 @@
                   <!-- Formulario 2: Nuevo Registro -->
                   <div class="tab-pane fade" id="tab-registro" role="tabpanel">
                     <h5 class="fw-bold mb-3">Formulario de Nuevo Registro</h5>
-                    <form id="formRegistro" onsubmit="generarCredencial(event)">
+                    <form id="formRegistro">
                       <div class="mb-3">
                         <label class="form-label">Nombre Completo</label>
-                        <input type="text" id="regNombre" class="form-control" required placeholder="Ej: Ana Pérez">
+                        <input type="text" id="regNombre" class="form-control" placeholder="Ej: Ana Pérez">
                       </div>
                       <div class="mb-3">
                         <label class="form-label">Cédula / Identificación</label>
-                        <input type="text" id="regCedula" class="form-control" required placeholder="Ej: V-12345678">
+                        <input type="text" id="regCedula" class="form-control" placeholder="Ej: V-12345678">
                       </div>
                       <div class="mb-3">
                         <label class="form-label">Cargo / Ocupación</label>
-                        <input type="text" id="regCargo" class="form-control" required placeholder="Ej: Técnico Electromédico">
+                        <input type="text" id="regCargo" class="form-control" placeholder="Ej: Técnico Electromédico">
                       </div>
                       <div class="mb-3">
                         <label class="form-label">Área / Departamento</label>
-                        <select id="regArea" class="form-select" required>
+                        <select id="regArea" class="form-select">
                           <option value="">Seleccione un área...</option>
                           <option value="Electromedicina">Electromedicina</option>
                           <option value="Mantenimiento">Mantenimiento Hospitalario</option>
@@ -152,7 +152,7 @@
                           <option value="Administrativo">Administrativo</option>
                         </select>
                       </div>
-                      <button type="submit" class="btn btn-success w-100 fw-bold">Registrar Usuario</button>
+                      <button type="button" onclick="generarCredencial()" class="btn btn-success w-100 fw-bold">Registrar Usuario</button>
                     </form>
                   </div>
 
@@ -192,7 +192,7 @@
                 <label class="form-label">Categoría</label>
                 <select id="docCategoria" class="form-select" required>
                   <option value="Manuales Técnicos">Manuales Técnicos</option>
-                  <option value="Guías Rápida">Guías Rápidas</option>
+                  <option value="Guías Rápidas">Guías Rápidas</option>
                   <option value="Normativas">Normativas / ISO / COVENIN</option>
                   <option value="Investigación">Investigación / Guías PNF</option>
                 </select>
@@ -312,9 +312,14 @@
     }
 
     // Iniciar Sesión (Para usuarios registrados previamente)
-    function iniciarSesion(e) {
-      e.preventDefault();
+    function iniciarSesion() {
       const cedulaIngresada = document.getElementById('loginCedula').value.trim();
+      
+      if (!cedulaIngresada) {
+        alert("Por favor ingrese su número de cédula.");
+        return;
+      }
+
       const usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
 
       // Buscar coincidencia por Cédula
@@ -324,17 +329,21 @@
         desplegarCredencial(usuarioEncontrado);
         document.getElementById('formLogin').reset();
       } else {
-        alert("Cédula no encontrada. Por favor verifique los datos o seleccione la pestaña 'Registrarse'.");
+        alert("Cédula no encontrada. Por favor verifique los datos o diríjase a la pestaña 'Registrarse' para crear su usuario.");
       }
     }
 
     // Registro de Nuevo Usuario y Generación de Código QR
-    function generarCredencial(e) {
-      e.preventDefault();
+    function generarCredencial() {
       const nombre = document.getElementById('regNombre').value.trim();
       const cedula = document.getElementById('regCedula').value.trim();
       const cargo = document.getElementById('regCargo').value.trim();
       const area = document.getElementById('regArea').value;
+
+      if (!nombre || !cedula || !cargo || !area) {
+        alert("Por favor complete todos los campos del formulario de registro.");
+        return;
+      }
 
       let usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
 
