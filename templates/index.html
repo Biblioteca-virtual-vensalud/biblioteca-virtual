@@ -1,9 +1,8 @@
 <!--
   PROYECTO: SISTEMA DE BIBLIOTECA VIRTUAL VENSALUD
   AUTORA: Iraida Josefina Mijares Ramírez
-  INSTITUCON: VENSALUD, S.A.
+  INSTITUCIÓN: VENSALUD, S.A.
   AÑO: 2026
-  DESCRIPCIÓN: Interfaz principal para la consulta de manuales, registro/inicio de sesión de usuarios y métricas.
 -->
 <!DOCTYPE html>
 <html lang="es">
@@ -11,16 +10,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Biblioteca Virtual VENSALUD</title>
+
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <style>
     body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .sidebar { background-color: #212529; min-height: 100vh; }
-    .sidebar .nav-link { color: #cfd8dc; cursor: pointer; padding: 12px 20px; }
+    .sidebar .nav-link { color: #cfd8dc; cursor: pointer; padding: 12px 20px; border-radius: 6px; margin: 2px 10px; }
     .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #0d6efd; color: #fff; }
     .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .nav-pills .nav-link.active { background-color: #0d6efd; color: white; font-weight: bold; }
@@ -33,7 +34,7 @@
 </head>
 <body>
 
-  <!-- Navegación Superior para Móviles -->
+  <!-- Navegación Superior Móvil -->
   <nav class="navbar navbar-dark bg-dark d-md-none p-3 shadow-sm">
     <div class="container-fluid">
       <div>
@@ -50,7 +51,8 @@
 
   <div class="container-fluid">
     <div class="row">
-      <!-- Menú Lateral Responsivo -->
+
+      <!-- Menú Lateral -->
       <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
         <div class="p-3 border-bottom border-secondary text-white text-center d-none d-md-block">
           <div class="fs-5 fw-bold"><i class="fa-solid fa-book-bookmark me-2"></i>Biblioteca Virtual</div>
@@ -85,17 +87,16 @@
         </ul>
       </nav>
 
-      <!-- Contenido Principal -->
+      <!-- Área de Contenido -->
       <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
         
-        <!-- Sección 1: Acceso / Registro de Usuarios -->
+        <!-- Sección 1: Registro/Acceso QR -->
         <section id="sec-registro" class="seccion-contenido">
           <h2 class="mb-4 text-primary fw-bold">Acceso a Usuarios y Credencial Digital</h2>
           <div class="row">
             <div class="col-md-6 mb-3">
               <div class="card card-custom p-4 bg-white">
                 
-                <!-- Pestañas para elegir entre Iniciar Sesión o Registrarse -->
                 <ul class="nav nav-pills nav-justified mb-4" id="authTabs" role="tablist">
                   <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="login-tab" data-bs-toggle="pill" data-bs-target="#tab-login" type="button" role="tab">
@@ -110,41 +111,44 @@
                 </ul>
 
                 <div class="tab-content" id="authTabsContent">
-                  
-                  <!-- Formulario 1: Iniciar Sesión (CON ONSUBMIT CORREGIDO) -->
+                  <!-- Login -->
                   <div class="tab-pane fade show active" id="tab-login" role="tabpanel">
                     <h5 class="fw-bold mb-3">Consultar Credencial Existente</h5>
                     <form id="formLogin" onsubmit="event.preventDefault(); iniciarSesion();">
                       <div class="mb-3">
-                        <label class="form-label">Cédula / Identificación</label>
-                        <input type="text" id="loginCedula" class="form-control" placeholder="Ej: V-12345678">
-                        <div class="form-text">Ingrese la cédula utilizada al momento del registro.</div>
+                        <label class="form-label" for="loginCedula">Cédula / Identificación</label>
+                        <input type="text" id="loginCedula" class="form-control" placeholder="Ej: V-12345678" required>
                       </div>
-                      <button type="button" onclick="iniciarSesion()" class="btn btn-primary w-100 fw-bold">
+                      <div class="mb-3">
+                        <label class="form-label" for="loginCodigo">ID Único / Clave del Sistema</label>
+                        <input type="text" id="loginCodigo" class="form-control" placeholder="Ej: VEN-5359" required>
+                        <div class="form-text">Ingrese la clave asignada durante su registro.</div>
+                      </div>
+                      <button type="submit" class="btn btn-primary w-100 fw-bold">
                         <i class="fa-solid fa-qrcode me-2"></i>Obtener mi Credencial QR
                       </button>
                     </form>
                   </div>
 
-                  <!-- Formulario 2: Nuevo Registro -->
+                  <!-- Registro -->
                   <div class="tab-pane fade" id="tab-registro" role="tabpanel">
                     <h5 class="fw-bold mb-3">Formulario de Nuevo Registro</h5>
                     <form id="formRegistro" onsubmit="event.preventDefault(); generarCredencial();">
                       <div class="mb-3">
-                        <label class="form-label">Nombre Completo</label>
-                        <input type="text" id="regNombre" class="form-control" placeholder="Ej: Ana Pérez">
+                        <label class="form-label" for="regNombre">Nombre Completo</label>
+                        <input type="text" id="regNombre" class="form-control" placeholder="Ej: Ana Pérez" required>
                       </div>
                       <div class="mb-3">
-                        <label class="form-label">Cédula / Identificación</label>
-                        <input type="text" id="regCedula" class="form-control" placeholder="Ej: V-12345678">
+                        <label class="form-label" for="regCedula">Cédula / Identificación</label>
+                        <input type="text" id="regCedula" class="form-control" placeholder="Ej: V-12345678" required>
                       </div>
                       <div class="mb-3">
-                        <label class="form-label">Cargo / Ocupación</label>
-                        <input type="text" id="regCargo" class="form-control" placeholder="Ej: Técnico Electromédico">
+                        <label class="form-label" for="regCargo">Cargo / Ocupación</label>
+                        <input type="text" id="regCargo" class="form-control" placeholder="Ej: Técnico Electromédico" required>
                       </div>
                       <div class="mb-3">
-                        <label class="form-label">Área / Departamento</label>
-                        <select id="regArea" class="form-select">
+                        <label class="form-label" for="regArea">Área / Departamento</label>
+                        <select id="regArea" class="form-select" required>
                           <option value="">Seleccione un área...</option>
                           <option value="Electromedicina">Electromedicina</option>
                           <option value="Mantenimiento">Mantenimiento Hospitalario</option>
@@ -152,20 +156,19 @@
                           <option value="Administrativo">Administrativo</option>
                         </select>
                       </div>
-                      <button type="button" onclick="generarCredencial()" class="btn btn-success w-100 fw-bold">Registrar Usuario</button>
+                      <button type="submit" class="btn btn-success w-100 fw-bold">Registrar Usuario</button>
                     </form>
                   </div>
-
                 </div>
 
               </div>
             </div>
 
-            <!-- Card donde se despliega la Credencial -->
+            <!-- Visualizador de Credencial -->
             <div class="col-md-6">
               <div id="cardCredencial" class="card card-custom p-4 bg-white text-center d-none">
                 <h5 class="fw-bold text-success mb-2">Credencial Digital</h5>
-                <p class="text-muted small">VENSALUD - Sistema Virtual</p>
+                <p class="text-muted small mb-1">VENSALUD - Sistema Virtual</p>
                 <div id="qrcode" class="d-flex justify-content-center my-3"></div>
                 <div class="text-start border-top pt-3">
                   <p class="mb-1"><strong>Nombre:</strong> <span id="credNombre"></span></p>
@@ -185,11 +188,11 @@
           <div class="card card-custom p-4 bg-white col-md-8">
             <form id="formCargar" onsubmit="guardarDocumento(event)">
               <div class="mb-3">
-                <label class="form-label">Título del Documento</label>
+                <label class="form-label" for="docTitulo">Título del Documento</label>
                 <input type="text" id="docTitulo" class="form-control" required placeholder="Ej: Manual de Servicio Incubadora">
               </div>
               <div class="mb-3">
-                <label class="form-label">Categoría</label>
+                <label class="form-label" for="docCategoria">Categoría</label>
                 <select id="docCategoria" class="form-select" required>
                   <option value="Manuales Técnicos">Manuales Técnicos</option>
                   <option value="Guías Rápidas">Guías Rápidas</option>
@@ -198,15 +201,16 @@
                 </select>
               </div>
               <div class="mb-3">
-                <label class="form-label">Seleccionar Archivo (PDF / Imagen / Texto)</label>
-                <input type="file" id="docArchivo" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" required>
+                <label class="form-label" for="docArchivo">Seleccionar Archivo (PDF / Imagen)</label>
+                <input type="file" id="docArchivo" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required>
+                <div class="form-text">Soporta archivos PDF e imágenes pesadas mediante almacenamiento local expandido (IndexedDB).</div>
               </div>
               <button type="submit" class="btn btn-success fw-bold">Guardar en Biblioteca</button>
             </form>
           </div>
         </section>
 
-        <!-- Sección 3: Documentos Cargados -->
+        <!-- Sección 3: Catálogo -->
         <section id="sec-documentos" class="seccion-contenido d-none">
           <h2 class="mb-4 text-primary fw-bold">Catálogo de Documentos</h2>
           <div class="row" id="contenedorDocumentos"></div>
@@ -242,16 +246,14 @@
           <h2 class="mb-4 text-primary fw-bold">Panel de Administración</h2>
           <div id="bloqueLoginAdmin" class="card card-custom p-4 bg-white col-md-6">
             <h5>Acceso Restringido</h5>
-            <form onsubmit="event.preventDefault(); validarAccesoAdmin();">
-              <div class="mb-3">
-                <label class="form-label">Clave de Administrador</label>
-                <input type="password" id="claveAdmin" class="form-control" placeholder="Ingrese clave">
-              </div>
-              <button type="button" onclick="validarAccesoAdmin()" class="btn btn-dark fw-bold">Ingresar</button>
-            </form>
+            <div class="mb-3">
+              <label class="form-label" for="claveAdmin">Clave de Administrador</label>
+              <input type="password" id="claveAdmin" class="form-control" placeholder="Ingrese clave">
+            </div>
+            <button onclick="validarAccesoAdmin()" class="btn btn-dark fw-bold">Ingresar</button>
           </div>
           <div id="bloquePanelAdmin" class="d-none">
-            <div class="alert alert-success fw-bold">Modo Administrador Activo (Clave Aceptada)</div>
+            <div class="alert alert-success fw-bold">Modo Administrador Activo</div>
             <button onclick="limpiarBaseDatos()" class="btn btn-danger fw-bold">Reiniciar Base de Datos Local</button>
           </div>
         </section>
@@ -266,31 +268,55 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="visorTitulo">Visor de Documento</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <a id="btnDescargarDoc" href="#" target="_blank" class="btn btn-sm btn-outline-primary ms-auto me-2 fw-bold" download>
+            <i class="fa-solid fa-download me-1"></i>Abrir / Descargar
+          </a>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="cerrarVisor()"></button>
         </div>
-        <div class="modal-body p-0" style="height: 80vh;">
+        <div class="modal-body p-0" style="height: 80vh;" id="visorContenedor">
           <iframe id="iframeVisor" src="" style="width:100%; height:100%; border:none;"></iframe>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bootstrap 5 JS -->
+  <!-- Scripts JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // Navegación entre Secciones
+    let miModalVisor = null;
+    let db = null;
+    let currentObjectUrl = null;
+
+    // Inicializar IndexedDB para archivos pesados
+    const request = indexedDB.open("VensaludBibliotecaDB", 1);
+    request.onupgradeneeded = function(e) {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("documentos")) {
+        db.createObjectStore("documentos", { keyPath: "id", autoIncrement: true });
+      }
+    };
+    request.onsuccess = function(e) {
+      db = e.target.result;
+    };
+    request.onerror = function(e) {
+      console.error("Error al abrir IndexedDB", e);
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      miModalVisor = new bootstrap.Modal(document.getElementById('modalVisor'));
+    });
+
     function mostrarSeccion(id) {
       document.querySelectorAll('.seccion-contenido').forEach(el => el.classList.add('d-none'));
-      document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
       
       document.getElementById('sec-' + id).classList.remove('d-none');
       document.getElementById('nav-' + id).classList.add('active');
 
-      // Cerrar menú responsive automáticamente en móviles
       const sidebarMenu = document.getElementById('sidebarMenu');
       if (sidebarMenu.classList.contains('show')) {
-        const bsCollapse = new bootstrap.Collapse(sidebarMenu);
+        const bsCollapse = bootstrap.Collapse.getInstance(sidebarMenu) || new bootstrap.Collapse(sidebarMenu);
         bsCollapse.hide();
       }
 
@@ -298,7 +324,6 @@
       if(id === 'metricas') actualizarMetricas();
     }
 
-    // Mostrar datos de credencial en pantalla
     function desplegarCredencial(usuario) {
       document.getElementById('credNombre').innerText = usuario.nombre;
       document.getElementById('credCedula').innerText = usuario.cedula;
@@ -313,46 +338,40 @@
       document.getElementById('cardCredencial').classList.remove('d-none');
     }
 
-    // Iniciar Sesión (Para usuarios registrados previamente)
     function iniciarSesion() {
       const cedulaIngresada = document.getElementById('loginCedula').value.trim();
-      
-      if (!cedulaIngresada) {
-        alert("Por favor ingrese su número de cédula.");
+      const codigoIngresado = document.getElementById('loginCodigo').value.trim();
+
+      if (!cedulaIngresada || !codigoIngresado) {
+        alert("Por favor complete tanto la Cédula como el ID Único / Clave.");
         return;
       }
 
       const usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
-
-      // Buscar coincidencia por Cédula
-      const usuarioEncontrado = usuarios.find(u => u.cedula.toLowerCase() === cedulaIngresada.toLowerCase());
+      const usuarioEncontrado = usuarios.find(u => 
+        u.cedula.toLowerCase() === cedulaIngresada.toLowerCase() && 
+        u.codigoUnico.toLowerCase() === codigoIngresado.toLowerCase()
+      );
 
       if (usuarioEncontrado) {
         desplegarCredencial(usuarioEncontrado);
         document.getElementById('formLogin').reset();
       } else {
-        alert("Cédula no encontrada. Por favor verifique los datos o diríjase a la pestaña 'Registrarse' para crear su usuario.");
+        alert("Cédula o ID Único / Clave incorrectos. Verifique sus datos.");
       }
     }
 
-    // Registro de Nuevo Usuario y Generación de Código QR
     function generarCredencial() {
       const nombre = document.getElementById('regNombre').value.trim();
       const cedula = document.getElementById('regCedula').value.trim();
       const cargo = document.getElementById('regCargo').value.trim();
       const area = document.getElementById('regArea').value;
 
-      if (!nombre || !cedula || !cargo || !area) {
-        alert("Por favor complete todos los campos del formulario de registro.");
-        return;
-      }
+      if (!nombre || !cedula || !cargo || !area) return;
 
       let usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
-
-      // Verificar si la cédula ya existe
-      const yaExiste = usuarios.some(u => u.cedula.toLowerCase() === cedula.toLowerCase());
-      if (yaExiste) {
-        alert("Esta cédula ya se encuentra registrada. Puede consultar su credencial desde la pestaña 'Iniciar Sesión'.");
+      if (usuarios.some(u => u.cedula.toLowerCase() === cedula.toLowerCase())) {
+        alert("Esta cédula ya está registrada. Por favor ingrese mediante 'Iniciar Sesión'.");
         return;
       }
 
@@ -364,106 +383,150 @@
 
       desplegarCredencial(nuevoUsuario);
       document.getElementById('formRegistro').reset();
-      alert("¡Usuario registrado exitosamente!");
+      alert("¡Usuario registrado exitosamente! Su clave asignada es: " + codigoUnico);
     }
 
-    // Guardar Documento
     function guardarDocumento(e) {
       e.preventDefault();
-      const titulo = document.getElementById('docTitulo').value;
+      const titulo = document.getElementById('docTitulo').value.trim();
       const categoria = document.getElementById('docCategoria').value;
       const fileInput = document.getElementById('docArchivo');
       const file = fileInput.files[0];
 
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const docData = { titulo, categoria, dataUrl: evt.target.result, fecha: new Date().toLocaleDateString() };
-          let docs = JSON.parse(localStorage.getItem('vensalud_docs') || '[]');
-          docs.push(docData);
-          localStorage.setItem('vensalud_docs', JSON.stringify(docs));
-          alert("¡Documento guardado con éxito!");
-          document.getElementById('formCargar').reset();
-        } catch(err) {
-          alert("El archivo es demasiado grande para el almacenamiento local. Intente con un archivo PDF o imagen de menor tamaño.");
-        }
+      const tx = db.transaction("documentos", "readwrite");
+      const store = tx.objectStore("documentos");
+      
+      const nuevoDoc = {
+        titulo: titulo,
+        categoria: categoria,
+        nombreArchivo: file.name,
+        tipoArchivo: file.type,
+        archivoBlob: file,
+        fecha: new Date().toLocaleDateString()
       };
-      reader.readAsDataURL(file);
+
+      const reqAdd = store.add(nuevoDoc);
+      reqAdd.onsuccess = function() {
+        alert("¡Documento guardado con éxito en la Biblioteca Virtual!");
+        document.getElementById('formCargar').reset();
+      };
+      reqAdd.onerror = function() {
+        alert("Error al guardar el archivo en la base de datos.");
+      };
     }
 
-    // Cargar Catálogo
     function cargarCatalogoDocumentos() {
       const contenedor = document.getElementById('contenedorDocumentos');
-      const docs = JSON.parse(localStorage.getItem('vensalud_docs') || '[]');
       contenedor.innerHTML = "";
 
-      if(docs.length === 0) {
-        contenedor.innerHTML = `<div class="col-12"><div class="alert alert-info">No hay documentos registrados aún.</div></div>`;
-        return;
-      }
+      if (!db) return;
 
-      docs.forEach((doc, idx) => {
-        contenedor.innerHTML += `
-          <div class="col-md-4 mb-3">
-            <div class="card card-custom p-3 bg-white h-100 d-flex flex-column justify-content-between">
-              <div>
-                <span class="badge bg-primary mb-2">${doc.categoria}</span>
-                <h5 class="fw-bold">${doc.titulo}</h5>
-                <small class="text-muted">Fecha: ${doc.fecha}</small>
+      const tx = db.transaction("documentos", "readonly");
+      const store = tx.objectStore("documentos");
+      const reqGet = store.getAll();
+
+      reqGet.onsuccess = function() {
+        const docs = reqGet.result;
+        if(docs.length === 0) {
+          contenedor.innerHTML = `<div class="col-12"><div class="alert alert-info">No hay documentos registrados aún.</div></div>`;
+          return;
+        }
+
+        docs.forEach((doc) => {
+          contenedor.innerHTML += `
+            <div class="col-md-4 mb-3">
+              <div class="card card-custom p-3 bg-white h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <span class="badge bg-primary mb-2">${doc.categoria}</span>
+                  <h5 class="fw-bold text-truncate">${doc.titulo}</h5>
+                  <small class="text-muted d-block">Fecha: ${doc.fecha}</small>
+                  <small class="text-muted text-truncate d-block">${doc.nombreArchivo}</small>
+                </div>
+                <button onclick="verDocumento(${doc.id})" class="btn btn-outline-primary btn-sm mt-3 fw-bold">
+                  <i class="fa-solid fa-eye me-1"></i>Visualizar / Descargar
+                </button>
               </div>
-              <button onclick="verDocumento(${idx})" class="btn btn-outline-primary btn-sm mt-3 fw-bold">
-                <i class="fa-solid fa-eye me-1"></i>Visualizar
-              </button>
             </div>
-          </div>
-        `;
-      });
+          `;
+        });
+      };
     }
 
-    // Ver Documento en Modal
-    function verDocumento(index) {
-      const docs = JSON.parse(localStorage.getItem('vensalud_docs') || '[]');
-      const doc = docs[index];
-      if(doc) {
-        document.getElementById('visorTitulo').innerText = doc.titulo;
-        document.getElementById('iframeVisor').src = doc.dataUrl;
-        let consultas = parseInt(localStorage.getItem('vensalud_consultas') || '0');
-        localStorage.setItem('vensalud_consultas', consultas + 1);
-        const myModal = new bootstrap.Modal(document.getElementById('modalVisor'));
-        myModal.show();
+    function verDocumento(id) {
+      const tx = db.transaction("documentos", "readonly");
+      const store = tx.objectStore("documentos");
+      const reqGet = store.get(id);
+
+      reqGet.onsuccess = function() {
+        const doc = reqGet.result;
+        if(doc) {
+          document.getElementById('visorTitulo').innerText = doc.titulo;
+          
+          if (currentObjectUrl) {
+            URL.revokeObjectURL(currentObjectUrl);
+          }
+          
+          currentObjectUrl = URL.createObjectURL(doc.archivoBlob);
+          
+          const iframe = document.getElementById('iframeVisor');
+          iframe.src = currentObjectUrl;
+
+          const btnDescargar = document.getElementById('btnDescargarDoc');
+          btnDescargar.href = currentObjectUrl;
+          btnDescargar.download = doc.nombreArchivo;
+
+          let consultas = parseInt(localStorage.getItem('vensalud_consultas') || '0');
+          localStorage.setItem('vensalud_consultas', consultas + 1);
+
+          miModalVisor.show();
+        }
+      };
+    }
+
+    function cerrarVisor() {
+      document.getElementById('iframeVisor').src = "";
+      if (currentObjectUrl) {
+        URL.revokeObjectURL(currentObjectUrl);
+        currentObjectUrl = null;
       }
     }
 
-    // Actualizar Métricas
     function actualizarMetricas() {
       const usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
-      const docs = JSON.parse(localStorage.getItem('vensalud_docs') || '[]');
       const consultas = localStorage.getItem('vensalud_consultas') || '0';
-
       document.getElementById('mTotalUsuarios').innerText = usuarios.length;
-      document.getElementById('mTotalDocumentos').innerText = docs.length;
       document.getElementById('mTotalConsultas').innerText = consultas;
+
+      if (db) {
+        const tx = db.transaction("documentos", "readonly");
+        const store = tx.objectStore("documentos");
+        const reqCount = store.count();
+        reqCount.onsuccess = function() {
+          document.getElementById('mTotalDocumentos').innerText = reqCount.result;
+        };
+      }
     }
 
-    // Validar Admin
     function validarAccesoAdmin() {
       const clave = document.getElementById('claveAdmin').value;
       if(clave === '1234') {
         document.getElementById('bloqueLoginAdmin').classList.add('d-none');
         document.getElementById('bloquePanelAdmin').classList.remove('d-none');
       } else {
-        alert("Clave incorrecta. La clave por defecto es 1234.");
+        alert("Clave incorrecta. (Clave por defecto: 1234)");
       }
     }
 
-    // Limpiar Base de Datos
     function limpiarBaseDatos() {
-      if(confirm("¿Está segura de que desea borrar todos los registros y documentos locales?")) {
+      if(confirm("¿Confirma la eliminación completa de los datos almacenados localmente?")) {
         localStorage.clear();
-        alert("Base de datos reiniciada.");
-        location.reload();
+        const reqDel = indexedDB.deleteDatabase("VensaludBibliotecaDB");
+        reqDel.onsuccess = function() {
+          alert("Base de datos reiniciada completamente.");
+          location.reload();
+        };
       }
     }
   </script>
