@@ -114,7 +114,7 @@
                   <!-- Login -->
                   <div class="tab-pane fade show active" id="tab-login" role="tabpanel">
                     <h5 class="fw-bold mb-3">Consultar Credencial Existente</h5>
-                    <form id="formLogin" onsubmit="event.preventDefault(); iniciarSesion();">
+                    <form id="formLogin" onsubmit="iniciarSesion(event)">
                       <div class="mb-3">
                         <label class="form-label" for="loginCedula">Cédula / Identificación</label>
                         <input type="text" id="loginCedula" class="form-control" placeholder="Ej: V-12345678" required>
@@ -122,7 +122,6 @@
                       <div class="mb-3">
                         <label class="form-label" for="loginCodigo">ID Único / Clave del Sistema</label>
                         <input type="text" id="loginCodigo" class="form-control" placeholder="Ej: VEN-5359" required>
-                        <div class="form-text">Ingrese la clave asignada durante su registro.</div>
                       </div>
                       <button type="submit" class="btn btn-primary w-100 fw-bold">
                         <i class="fa-solid fa-qrcode me-2"></i>Obtener mi Credencial QR
@@ -133,7 +132,7 @@
                   <!-- Registro -->
                   <div class="tab-pane fade" id="tab-registro" role="tabpanel">
                     <h5 class="fw-bold mb-3">Formulario de Nuevo Registro</h5>
-                    <form id="formRegistro" onsubmit="event.preventDefault(); generarCredencial();">
+                    <form id="formRegistro" onsubmit="generarCredencial(event)">
                       <div class="mb-3">
                         <label class="form-label" for="regNombre">Nombre Completo</label>
                         <input type="text" id="regNombre" class="form-control" placeholder="Ej: Ana Pérez" required>
@@ -203,7 +202,6 @@
               <div class="mb-3">
                 <label class="form-label" for="docArchivo">Seleccionar Archivo (PDF / Imagen)</label>
                 <input type="file" id="docArchivo" class="form-control" accept=".pdf,.png,.jpg,.jpeg" required>
-                <div class="form-text">Soporta archivos PDF e imágenes pesadas mediante almacenamiento local expandido (IndexedDB).</div>
               </div>
               <button type="submit" class="btn btn-success fw-bold">Guardar en Biblioteca</button>
             </form>
@@ -244,17 +242,70 @@
         <!-- Sección 5: Administrador -->
         <section id="sec-admin" class="seccion-contenido d-none">
           <h2 class="mb-4 text-primary fw-bold">Panel de Administración</h2>
+          
+          <!-- Bloque de Ingreso con Clave -->
           <div id="bloqueLoginAdmin" class="card card-custom p-4 bg-white col-md-6">
             <h5>Acceso Restringido</h5>
             <div class="mb-3">
               <label class="form-label" for="claveAdmin">Clave de Administrador</label>
-              <input type="password" id="claveAdmin" class="form-control" placeholder="Ingrese clave">
+              <input type="password" id="claveAdmin" class="form-control" placeholder="Ingrese clave (Por defecto: 1234)">
             </div>
             <button onclick="validarAccesoAdmin()" class="btn btn-dark fw-bold">Ingresar</button>
           </div>
+
+          <!-- Panel de Control Activo -->
           <div id="bloquePanelAdmin" class="d-none">
-            <div class="alert alert-success fw-bold">Modo Administrador Activo</div>
-            <button onclick="limpiarBaseDatos()" class="btn btn-danger fw-bold">Reiniciar Base de Datos Local</button>
+            <div class="alert alert-success fw-bold d-flex justify-content-between align-items-center">
+              <span><i class="fa-solid fa-shield-halved me-2"></i>Modo Administrador Activo</span>
+              <button onclick="cerrarSesionAdmin()" class="btn btn-sm btn-outline-dark">Bloquear Panel</button>
+            </div>
+
+            <!-- Gestión de Usuarios Registrados -->
+            <div class="card card-custom p-4 bg-white mb-4">
+              <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-users me-2"></i>Gestión de Usuarios Registrados</h5>
+              <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Cédula</th>
+                      <th>Nombre</th>
+                      <th>Cargo / Área</th>
+                      <th>ID Único</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaAdminUsuarios"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Gestión de Artículos / Documentos -->
+            <div class="card card-custom p-4 bg-white mb-4">
+              <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-folder-open me-2"></i>Gestión de Artículos / Documentos</h5>
+              <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Título</th>
+                      <th>Categoría</th>
+                      <th>Archivo</th>
+                      <th>Fecha</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaAdminDocumentos"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Restablecer Sistema -->
+            <div class="card card-custom p-4 bg-white border-start border-danger border-4">
+              <h5 class="fw-bold text-danger mb-2">Restablecer Sistema</h5>
+              <p class="text-muted small">Elimina por completo todos los registros locales de usuarios y la base de datos de documentos.</p>
+              <button onclick="limpiarBaseDatos()" class="btn btn-danger fw-bold col-md-4">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Reiniciar Base de Datos Local
+              </button>
+            </div>
           </div>
         </section>
 
@@ -288,7 +339,7 @@
     let db = null;
     let currentObjectUrl = null;
 
-    // Inicializar IndexedDB para archivos pesados
+    // Inicializar IndexedDB
     const request = indexedDB.open("VensaludBibliotecaDB", 1);
     request.onupgradeneeded = function(e) {
       db = e.target.result;
@@ -324,6 +375,10 @@
       if(id === 'metricas') actualizarMetricas();
     }
 
+    function normalizarString(str) {
+      return (str || '').toString().trim().toLowerCase().replace(/[^a-z0-0]/g, '');
+    }
+
     function desplegarCredencial(usuario) {
       document.getElementById('credNombre').innerText = usuario.nombre;
       document.getElementById('credCedula').innerText = usuario.cedula;
@@ -338,30 +393,39 @@
       document.getElementById('cardCredencial').classList.remove('d-none');
     }
 
-    function iniciarSesion() {
-      const cedulaIngresada = document.getElementById('loginCedula').value.trim();
-      const codigoIngresado = document.getElementById('loginCodigo').value.trim();
+    function iniciarSesion(event) {
+      if(event) event.preventDefault();
 
-      if (!cedulaIngresada || !codigoIngresado) {
-        alert("Por favor complete tanto la Cédula como el ID Único / Clave.");
+      const cedulaIngresada = document.getElementById('loginCedula').value;
+      const codigoIngresado = document.getElementById('loginCodigo').value;
+
+      if (!cedulaIngresada.trim() || !codigoIngresado.trim()) {
+        alert("Por favor complete tanto la Cédula como el ID Único.");
         return;
       }
 
+      const cedulaNorm = normalizarString(cedulaIngresada);
+      const codigoNorm = normalizarString(codigoIngresado);
+
       const usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
-      const usuarioEncontrado = usuarios.find(u => 
-        u.cedula.toLowerCase() === cedulaIngresada.toLowerCase() && 
-        u.codigoUnico.toLowerCase() === codigoIngresado.toLowerCase()
-      );
+      
+      const usuarioEncontrado = usuarios.find(u => {
+        const uCedulaNorm = normalizarString(u.cedula);
+        const uCodigoNorm = normalizarString(u.codigoUnico);
+        return uCedulaNorm === cedulaNorm && uCodigoNorm === codigoNorm;
+      });
 
       if (usuarioEncontrado) {
         desplegarCredencial(usuarioEncontrado);
         document.getElementById('formLogin').reset();
       } else {
-        alert("Cédula o ID Único / Clave incorrectos. Verifique sus datos.");
+        alert("No se encontró ningún usuario coincidente. Verifique la Cédula e ID Único ingresados.");
       }
     }
 
-    function generarCredencial() {
+    function generarCredencial(event) {
+      if(event) event.preventDefault();
+
       const nombre = document.getElementById('regNombre').value.trim();
       const cedula = document.getElementById('regCedula').value.trim();
       const cargo = document.getElementById('regCargo').value.trim();
@@ -370,8 +434,10 @@
       if (!nombre || !cedula || !cargo || !area) return;
 
       let usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
-      if (usuarios.some(u => u.cedula.toLowerCase() === cedula.toLowerCase())) {
-        alert("Esta cédula ya está registrada. Por favor ingrese mediante 'Iniciar Sesión'.");
+      const cedulaNorm = normalizarString(cedula);
+
+      if (usuarios.some(u => normalizarString(u.cedula) === cedulaNorm)) {
+        alert("Esta cédula ya se encuentra registrada. Inicie sesión directamente.");
         return;
       }
 
@@ -383,7 +449,7 @@
 
       desplegarCredencial(nuevoUsuario);
       document.getElementById('formRegistro').reset();
-      alert("¡Usuario registrado exitosamente! Su clave asignada es: " + codigoUnico);
+      alert("¡Usuario registrado exitosamente! Su ID asignado es: " + codigoUnico);
     }
 
     function guardarDocumento(e) {
@@ -509,22 +575,111 @@
       }
     }
 
+    // Funciones del Panel de Administración
     function validarAccesoAdmin() {
       const clave = document.getElementById('claveAdmin').value;
       if(clave === '1234') {
         document.getElementById('bloqueLoginAdmin').classList.add('d-none');
         document.getElementById('bloquePanelAdmin').classList.remove('d-none');
+        cargarTablasAdmin();
       } else {
         alert("Clave incorrecta. (Clave por defecto: 1234)");
       }
     }
 
+    function cerrarSesionAdmin() {
+      document.getElementById('claveAdmin').value = "";
+      document.getElementById('bloqueLoginAdmin').classList.remove('d-none');
+      document.getElementById('bloquePanelAdmin').classList.add('d-none');
+    }
+
+    function cargarTablasAdmin() {
+      // Cargar tabla de usuarios
+      const tbodyUsuarios = document.getElementById('tablaAdminUsuarios');
+      const usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
+      tbodyUsuarios.innerHTML = "";
+
+      if(usuarios.length === 0) {
+        tbodyUsuarios.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No hay usuarios registrados.</td></tr>`;
+      } else {
+        usuarios.forEach((u, index) => {
+          tbodyUsuarios.innerHTML += `
+            <tr>
+              <td>${u.cedula}</td>
+              <td>${u.nombre}</td>
+              <td>${u.cargo} (${u.area})</td>
+              <td><span class="badge bg-secondary">${u.codigoUnico}</span></td>
+              <td>
+                <button onclick="eliminarUsuario(${index})" class="btn btn-danger btn-sm fw-bold">
+                  <i class="fa-solid fa-trash me-1"></i>Eliminar
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Cargar tabla de documentos
+      if(!db) return;
+      const tx = db.transaction("documentos", "readonly");
+      const store = tx.objectStore("documentos");
+      const reqGet = store.getAll();
+
+      reqGet.onsuccess = function() {
+        const docs = reqGet.result;
+        const tbodyDocs = document.getElementById('tablaAdminDocumentos');
+        tbodyDocs.innerHTML = "";
+
+        if(docs.length === 0) {
+          tbodyDocs.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No hay documentos registrados.</td></tr>`;
+        } else {
+          docs.forEach(doc => {
+            tbodyDocs.innerHTML += `
+              <tr>
+                <td class="fw-bold">${doc.titulo}</td>
+                <td><span class="badge bg-primary">${doc.categoria}</span></td>
+                <td><small class="text-muted">${doc.nombreArchivo}</small></td>
+                <td>${doc.fecha}</td>
+                <td>
+                  <button onclick="eliminarDocumentoAdmin(${doc.id})" class="btn btn-danger btn-sm fw-bold">
+                    <i class="fa-solid fa-trash me-1"></i>Eliminar
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+      };
+    }
+
+    function eliminarUsuario(index) {
+      if(confirm("¿Confirma que desea eliminar este usuario del sistema?")) {
+        let usuarios = JSON.parse(localStorage.getItem('vensalud_usuarios') || '[]');
+        usuarios.splice(index, 1);
+        localStorage.setItem('vensalud_usuarios', JSON.stringify(usuarios));
+        cargarTablasAdmin();
+        alert("Usuario eliminado correctamente.");
+      }
+    }
+
+    function eliminarDocumentoAdmin(id) {
+      if(confirm("¿Confirma que desea eliminar este documento de la biblioteca?")) {
+        const tx = db.transaction("documentos", "readwrite");
+        const store = tx.objectStore("documentos");
+        const reqDel = store.delete(id);
+        reqDel.onsuccess = function() {
+          cargarTablasAdmin();
+          alert("Documento eliminado correctamente.");
+        };
+      }
+    }
+
     function limpiarBaseDatos() {
-      if(confirm("¿Confirma la eliminación completa de los datos almacenados localmente?")) {
+      if(confirm("¿Confirma la eliminación completa de TODOS los datos almacenados localmente (usuarios y documentos)?")) {
         localStorage.clear();
         const reqDel = indexedDB.deleteDatabase("VensaludBibliotecaDB");
         reqDel.onsuccess = function() {
-          alert("Base de datos reiniciada completamente.");
+          alert("Base de datos reiniciada.");
           location.reload();
         };
       }
